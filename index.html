@@ -695,6 +695,20 @@ body {
   z-index: 1;
 }
 .particle.play { opacity: 1; animation: particle-fly 0.55s ease-out forwards; }
+.drop-poop.has-image {
+  width: 172px;
+  height: 172px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+}
+.drop-poop img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
 .drop-poop {
   position: absolute;
   left: 50%;
@@ -744,6 +758,16 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.result-emoji.has-image {
+  padding: 4px;
+  font-size: 0;
+}
+.result-emoji img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 .result-emoji {
   width: 56px;
@@ -1191,10 +1215,46 @@ function updateRunningTease(sec) {
 
 function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
 
+function renderDropVisual(el, item) {
+  el.className = 'drop-poop';
+  el.setAttribute('aria-label', item.name || 'drop result');
+  el.textContent = '';
+
+  if (item.image) {
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.name || 'drop result';
+    el.appendChild(img);
+    el.classList.add('has-image');
+    return;
+  }
+
+  el.textContent = item.emoji || '💩';
+}
+
+function renderResultVisual(item) {
+  const el = document.getElementById('result-emoji');
+  el.className = 'result-emoji';
+  el.textContent = '';
+  el.setAttribute('aria-label', item.name || '掉落结果');
+
+  if (item.image) {
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.name || '掉落结果';
+    el.appendChild(img);
+    el.classList.add('has-image');
+    return;
+  }
+
+  el.textContent = item.emoji || '💩';
+}
+
 function pickDropResult() {
   const pool = [
     { emoji: '💩', name: '经典便便', desc: '复古经典，永不过时。' },
     { emoji: '💩✨', name: '闪亮便便', desc: '自带高光，今天气色不错。' },
+    { image: 'assets/group-warm-ball.svg', name: '抱团取暖球', desc: '暖乎乎挤成一团，陪你一起庆祝通畅时刻。' },
     { emoji: '💩🌈', name: '彩虹便便', desc: '色彩丰富，心情也一起变好。' },
     { emoji: '💩👑', name: '加冕便便', desc: '王者气场，闪闪发光。' },
     { emoji: '💩🔥', name: '热乎便便', desc: '刚出炉，注意文明围观。' },
@@ -1223,8 +1283,7 @@ function showEndOverlay({ elapsed }) {
   card.classList.remove('show');
 
   box.className = 'mystery-box';
-  poop.className = 'drop-poop';
-  poop.textContent = result.emoji;
+  renderDropVisual(poop, result);
 
   stage.querySelectorAll('.particle').forEach(p => p.remove());
 
@@ -1269,7 +1328,7 @@ function finalizeSessionAndShowCard(elapsed) {
   saveRecord(elapsed, item.pointsGain);
   document.getElementById('result-duration').textContent = fmt(elapsed);
   document.getElementById('result-points').textContent = String(item.pointsGain);
-  document.getElementById('result-emoji').textContent = item.emoji;
+  renderResultVisual(item);
   document.getElementById('result-name').textContent = item.name;
   document.getElementById('result-desc').textContent = item.desc;
 
