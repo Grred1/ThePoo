@@ -712,8 +712,8 @@ body {
 .drop-poop {
   position: absolute;
   left: 50%;
-  top: 12%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   font-size: 72px;
   opacity: 0;
   z-index: 3;
@@ -844,11 +844,11 @@ body {
   100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
 }
 @keyframes poop-fall {
-  0% { transform: translateX(-50%) translateY(-140px) scale(0.95); }
-  60% { transform: translateX(-50%) translateY(160px) scale(1.05); }
-  78% { transform: translateX(-50%) translateY(120px) scale(0.98); }
-  90% { transform: translateX(-50%) translateY(160px) scale(1.02); }
-  100% { transform: translateX(-50%) translateY(150px) scale(1); }
+  0% { transform: translate(-50%, -50%) translateY(-200px) scale(0.95); }
+  60% { transform: translate(-50%, -50%) translateY(20px) scale(1.05); }
+  78% { transform: translate(-50%, -50%) translateY(-10px) scale(0.98); }
+  90% { transform: translate(-50%, -50%) translateY(8px) scale(1.02); }
+  100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
 }
 </style>
 </head>
