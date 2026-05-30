@@ -20,7 +20,7 @@ export function createDrop({
   };
 
   const teaseByElapsed = (sec) => {
-    if (sec < 60) return { key: 't0', html: '还在热身呢？' };
+    if (sec < 5) return { key: 't0', html: '还在热身呢？' };
     if (sec < 180) return { key: 't1', html: '进入状态了，好样的' };
     if (sec < 480) return { key: 't2', html: '标准健康如厕，继续保持！' };
     if (sec < 900) return { key: 't3', html: '有点久了，腿还好吗？' };
@@ -50,7 +50,7 @@ export function createDrop({
   };
 
   const pointsGainByDuration = (sec) => {
-    if (sec < 60) return 0;
+    if (sec < 5) return 0;
     if (sec < 180) return 10;
     if (sec < 480) return 15;
     if (sec < 900) return 5;
@@ -71,8 +71,8 @@ export function createDrop({
     const luckyPoints = banner.getLuckyPoints();
     const bonuses = [];
 
-    if (sec < 60) {
-      bonuses.push('⚡ 1分钟内强制神秘');
+    if (sec < 5) {
+      bonuses.push('⚡ 5秒内强制神秘');
       const poop = data.findPoop('tiny_mystery') ?? pickByRarity('mystery');
       return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
     }

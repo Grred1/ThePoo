@@ -8,6 +8,7 @@ import { createRecords } from './records.js';
 import { createAtlas } from './atlas.js';
 import { createDrop } from './drop.js';
 import { createTabs } from './tabs.js';
+import { createDraw } from './draw.js';
 
 try {
   const storage = createStorage();
@@ -102,6 +103,11 @@ try {
     onEnterAtlas: atlas.renderAtlas,
     onEnterRecords: records.renderRecords,
   });
+
+  const draw = createDraw({
+    showToast: toast.showToast,
+  });
+  draw.init();
 
   banner.ensureStreakOnLoad({ todayYMD: utils.todayYMD, yesterdayYMD: utils.yesterdayYMD });
   banner.renderBanner();
