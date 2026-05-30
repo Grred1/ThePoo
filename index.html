@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>便便日记</title>
+<style>
+/* ===== RESET & TOKENS ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --cream:       #FEF3DC;
+  --card:        #FFFEF8;
+  --brown:       #5C3A1E;
+  --brown-mid:   #8B5E3C;
+  --brown-light: #C49A6C;
+  --mint:        #6DBF9E;
+  --mint-bg:     #C8EDDA;
+  --mint-scene:  #B8E4CC;
+  --pink:        #E8758C;
+  --pink-bg:     #FCE4EC;
+  --yellow:      #F5CC60;
+  --yellow-bg:   #FFF3C0;
+  --purple-bg:   #EAD5F5;
+  --text:        #3D2010;
+  --text-mid:    #7A5030;
+  --text-light:  #B89060;
+  --green-btn:   #4EBF78;
+  --green-shadow:#2E7A4A;
+  --pink-btn:    #E8758C;
+  --pink-shadow: #B84060;
+}
+
+body {
+  background: var(--cream);
+  background-image: radial-gradient(circle at 20% 10%, #FFF8E8 0%, transparent 60%),
+                    radial-gradient(circle at 80% 90%, #F5E8C8 0%, transparent 60%);
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  padding-bottom: 72px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ===== TOP NAV ===== */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 6px;
+}
+.nav-icon-btn {
+  width: 50px; height: 50px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 var(--brown);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1px;
+  cursor: pointer; flex-shrink: 0;
+}
+.nav-icon-btn .icon { font-size: 20px; line-height: 1; }
+.nav-icon-btn .badge {
+  font-size: 10px; font-weight: 800;
+  color: var(--brown); line-height: 1;
+}
+.nav-title-wrap {
+  background: var(--yellow-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 24px;
+  padding: 7px 20px;
+  box-shadow: 3px 3px 0 var(--brown);
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-title-wrap .poop { font-size: 22px; }
+.nav-title-wrap .title {
+  font-size: 1.25rem; font-weight: 900;
+  color: var(--brown); letter-spacing: 2px;
+}
+.settings-btn {
+  width: 50px; height: 50px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 var(--brown);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 22px; flex-shrink: 0;
+}
+
+/* ===== SUBTITLE ===== */
+.subtitle {
+  text-align: center;
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text-mid);
+  padding: 5px 16px 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ===== TIMER CARD ===== */
+.timer-card {
+  margin: 0 14px 8px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 22px;
+  padding: 10px 16px 12px;
+  box-shadow: 4px 4px 0 var(--brown-light);
+  position: relative;
+  overflow: hidden;
+}
+.timer-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: repeating-linear-gradient(90deg, var(--yellow) 0, var(--yellow) 10px, var(--mint-bg) 10px, var(--mint-bg) 20px);
+}
+.timer-label {
+  text-align: center;
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--text-mid);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+.timer-row {
+  display: flex; align-items: center;
+  justify-content: center; gap: 14px;
+}
+.timer-deco { font-size: 26px; }
+#timer-display {
+  font-size: 3.2rem; font-weight: 900;
+  color: var(--brown); letter-spacing: 4px;
+  line-height: 1; font-variant-numeric: tabular-nums;
+  text-shadow: 2px 2px 0 rgba(92,58,30,0.12);
+  min-width: 130px; text-align: center;
+}
+
+/* ===== CHARACTER SCENE ===== */
+.scene {
+  margin: 0 14px 8px;
+  border: 2.5px solid var(--brown);
+  border-radius: 22px;
+  overflow: hidden;
+  position: relative;
+  height: 248px;
+  background-color: var(--mint-scene);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.28) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(255,255,255,0.28) 1.5px, transparent 1.5px);
+  background-size: 34px 34px;
+  box-shadow: 4px 4px 0 var(--brown-light);
+}
+
+/* Floor strip */
+.scene-floor {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 42px;
+  background: #D4F0E0;
+  border-top: 2px solid rgba(92,58,30,0.2);
+}
+
+/* Left plant */
+.plant {
+  position: absolute; left: 6px; bottom: 36px;
+  width: 68px;
+}
+.plant-body {
+  position: relative; width: 68px; height: 72px;
+}
+.leaf {
+  position: absolute;
+  border-radius: 50% 50% 50% 0;
+  border: 2px solid var(--brown);
+}
+.leaf-1 { width: 36px; height: 22px; background: #7BC47A; bottom: 18px; left: 4px; transform: rotate(-40deg); }
+.leaf-2 { width: 32px; height: 20px; background: #5BAE5A; bottom: 28px; left: 22px; transform: rotate(30deg) scaleX(-1); }
+.leaf-3 { width: 28px; height: 18px; background: #7BC47A; bottom: 36px; left: 6px; transform: rotate(-70deg); }
+.leaf-4 { width: 24px; height: 16px; background: #4E9E4D; bottom: 38px; left: 28px; transform: rotate(60deg) scaleX(-1); }
+.plant-stem {
+  position: absolute; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 6px; height: 20px;
+  background: #5BAE5A; border: 1.5px solid var(--brown);
+  border-radius: 3px;
+}
+.pot {
+  width: 34px; height: 26px;
+  background: #C4856A;
+  border: 2px solid var(--brown);
+  border-radius: 4px 4px 7px 7px;
+  margin: 0 auto;
+  position: relative;
+}
+.pot::before {
+  content: '';
+  position: absolute; top: -5px; left: -3px; right: -3px; height: 7px;
+  background: #D4956A; border: 2px solid var(--brown);
+  border-radius: 3px;
+}
+
+/* Right paper holder */
+.paper-holder-wrap {
+  position: absolute; right: 14px; top: 28%;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+.paper-arm {
+  width: 10px; height: 30px;
+  background: var(--brown-light);
+  border: 2px solid var(--brown);
+  border-radius: 5px 5px 0 0;
+}
+.paper-roll-outer {
+  width: 44px; height: 44px;
+  background: #FFFEF8;
+  border: 2.5px solid var(--brown);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  position: relative;
+}
+.paper-roll-inner {
+  width: 16px; height: 16px;
+  background: #EEE8D8;
+  border: 2px solid var(--brown);
+  border-radius: 50%;
+}
+.paper-tail {
+  width: 24px; height: 16px;
+  background: #FFFEF8;
+  border: 2px solid var(--brown);
+  border-radius: 0 0 8px 8px;
+  margin-top: -2px; margin-left: 10px;
+}
+
+/* Wall picture */
+.wall-pic {
+  position: absolute; left: 54px; top: 12px;
+  width: 46px; height: 42px;
+  background: var(--yellow-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--brown);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+
+/* Tissue box */
+.tissue-box {
+  position: absolute; left: 12px; bottom: 42px;
+  width: 46px; height: 40px;
+  background: var(--pink-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 var(--brown);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+/* Tissue opening */
+.tissue-box::after {
+  content: '〜';
+  position: absolute; top: -6px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px; color: #fff;
+  text-shadow: 0 1px 2px var(--brown);
+}
+
+/* ===== Character ===== */
+.character-wrap {
+  position: absolute;
+  bottom: 36px; left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 2;
+}
+.character-img {
+  width: 205px; height: auto;
+  filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.15));
+  image-rendering: auto;
+}
+/* Fallback emoji if image missing */
+.char-fallback {
+  display: none;
+  font-size: 90px;
+  filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.15));
+}
+
+/* Toilet base (if no image, show something) */
+.toilet-base {
+  display: none;
+  width: 80px; height: 30px;
+  background: #fff; border: 2.5px solid var(--brown);
+  border-radius: 0 0 20px 20px;
+  position: absolute; bottom: 36px; left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Speech bubble */
+.speech-bubble {
+  position: absolute; top: 12px; right: 10px;
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 16px 16px 4px 16px;
+  padding: 7px 11px;
+  font-size: 0.76rem; font-weight: 800;
+  color: var(--brown);
+  box-shadow: 2px 2px 0 var(--brown-light);
+  max-width: 94px; text-align: center;
+  line-height: 1.45; z-index: 3;
+  animation: bubble-bounce 2.4s ease-in-out infinite;
+}
+.speech-bubble .heart { color: #E8758C; font-size: 11px; }
+
+/* Duang text */
+.duang {
+  position: absolute;
+  font-size: 0.78rem; font-weight: 800;
+  color: var(--brown-mid); font-style: italic;
+  z-index: 3; letter-spacing: 0.5px;
+}
+.duang-l { left: 22px; bottom: 98px; transform: rotate(-12deg); animation: duang-float 1.6s ease-in-out infinite; }
+.duang-r { right: 16px; bottom: 118px; transform: rotate(8deg); animation: duang-float 1.6s ease-in-out infinite 0.4s; }
+
+/* Sparkles */
+.sp {
+  position: absolute; font-size: 13px; z-index: 3;
+  animation: sp-anim 2s ease-in-out infinite;
+}
+.sp:nth-child(1) { top: 22px; left: 36%; animation-delay: 0s; }
+.sp:nth-child(2) { top: 38%; right: 30%; animation-delay: 0.7s; font-size: 10px; }
+.sp:nth-child(3) { bottom: 28%; left: 44%; animation-delay: 1.4s; }
+
+/* Running shimmer on scene */
+.scene.running {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.28) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(255,255,255,0.28) 1.5px, transparent 1.5px);
+  background-size: 34px 34px;
+}
+.scene.running .character-wrap {
+  animation: char-shake 0.55s ease-in-out infinite;
+}
+
+@keyframes bubble-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.04); }
+}
+@keyframes duang-float {
+  0%, 100% { transform: translateY(0) rotate(-12deg); opacity: 0.65; }
+  50% { transform: translateY(-8px) rotate(-12deg); opacity: 1; }
+}
+@keyframes sp-anim {
+  0%, 100% { opacity: 0.25; transform: scale(0.75) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.25) rotate(20deg); }
+}
+@keyframes char-shake {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-52%) rotate(1.5deg); }
+  75% { transform: translateX(-48%) rotate(-1.5deg); }
+}
+@keyframes btn-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-row {
+  display: flex; gap: 12px;
+  padding: 0 14px 9px;
+}
+.btn {
+  flex: 1; height: 88px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.08s, opacity 0.08s;
+  -webkit-appearance: none;
+  padding: 0;
+}
+.btn-start:active:not(:disabled),
+.btn-end:active:not(:disabled) { transform: scale(0.93); }
+.btn:disabled { opacity: 0.38; cursor: default; }
+.btn-icon { font-size: 16px; }
+.btn-img { padding: 0; overflow: visible; }
+.btn-img-icon { height: 88px; width: auto; object-fit: contain; }
+
+/* ===== INFO CARDS ===== */
+.cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 9px;
+  padding: 0 14px 9px;
+}
+.card {
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  padding: 10px 9px 9px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  display: flex; flex-direction: column; gap: 2px;
+  min-height: 90px;
+}
+.card.yellow { background: var(--yellow-bg); }
+.card.purple { background: var(--purple-bg); }
+.card-hd {
+  font-size: 0.65rem; font-weight: 800;
+  color: var(--text-mid);
+  display: flex; align-items: center; gap: 3px;
+  margin-bottom: 1px;
+}
+.card-val {
+  font-size: 1.5rem; font-weight: 900;
+  color: var(--brown); line-height: 1;
+}
+.card-val-sm { font-size: 1.1rem; font-weight: 900; color: var(--brown); line-height: 1; }
+.card-unit { font-size: 0.7rem; font-weight: 700; color: var(--text-mid); }
+.card-sub {
+  font-size: 0.62rem; font-weight: 600;
+  color: var(--text-light); line-height: 1.3;
+  display: flex; align-items: center; gap: 2px;
+}
+.card-sub.up { color: #4CAF70; }
+.card-sub.down { color: #E8758C; }
+.card-val-row { display: flex; align-items: baseline; gap: 3px; }
+/* Box card */
+.box-inner { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.box-emoji { font-size: 26px; }
+.box-info { display: flex; flex-direction: column; }
+.box-label { font-size: 0.62rem; font-weight: 700; color: var(--text-mid); line-height: 1.3; }
+.box-num { font-size: 1.3rem; font-weight: 900; color: var(--brown); line-height: 1; }
+
+/* ===== ENCOURAGE ===== */
+.encourage {
+  margin: 0 14px 10px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  padding: 11px 12px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.encourage-ico { font-size: 24px; flex-shrink: 0; }
+.encourage-txt {
+  flex: 1;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-mid); line-height: 1.45;
+}
+.encourage-arrow {
+  font-size: 18px; color: var(--text-light);
+  flex-shrink: 0; font-weight: 700;
+}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  height: 64px;
+  background: var(--card);
+  border-top: 2.5px solid var(--brown);
+  display: flex; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  cursor: pointer; padding: 6px 0;
+  color: var(--text-light);
+  font-size: 0.62rem; font-weight: 700;
+  transition: color 0.15s;
+}
+.nav-tab.active { color: var(--mint); }
+.nav-tab .tab-inner {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1px;
+  padding: 4px 12px; border-radius: 12px;
+}
+.nav-tab.active .tab-inner {
+  background: var(--mint-bg);
+  border: 2px solid var(--brown);
+  box-shadow: 2px 2px 0 var(--brown-light);
+}
+.tab-ico { font-size: 22px; line-height: 1; }
+.tab-lbl { font-size: 0.62rem; font-weight: 800; line-height: 1; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; top: 20%; left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--brown);
+  color: #fff; border-radius: 24px;
+  padding: 10px 24px; font-size: 0.9rem; font-weight: 800;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  z-index: 999; opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TOP NAV -->
+  <div class="top-nav">
+    <div class="nav-icon-btn">
+      <span class="icon">🧻</span>
+      <span class="badge">999+</span>
+    </div>
+    <div class="nav-title-wrap">
+      <span class="poop">💩</span>
+      <span class="title">PoopMart</span>
+    </div>
+    <div class="settings-btn">⚙️</div>
+  </div>
+
+  <!-- SUBTITLE -->
+  <div class="subtitle">我们的便便时长 ✨</div>
+
+  <!-- TIMER CARD -->
+  <div class="timer-card">
+    <div class="timer-label">✨ 本次便便时长 ✨</div>
+    <div class="timer-row">
+      <div class="timer-deco">💩</div>
+      <div id="timer-display">00:00</div>
+      <div class="timer-deco">💩</div>
+    </div>
+  </div>
+
+  <!-- CHARACTER SCENE -->
+  <div class="scene" id="scene">
+    <!-- Sparkles -->
+    <div class="sp">✦</div>
+    <div class="sp">✧</div>
+    <div class="sp">✦</div>
+    <!-- Wall decor -->
+    <div class="wall-pic">💩</div>
+    <!-- Left plant -->
+    <div class="plant">
+      <div class="plant-body">
+        <div class="leaf leaf-1"></div>
+        <div class="leaf leaf-2"></div>
+        <div class="leaf leaf-3"></div>
+        <div class="leaf leaf-4"></div>
+        <div class="plant-stem"></div>
+      </div>
+      <div class="pot"></div>
+    </div>
+    <!-- Tissue box -->
+    <div class="tissue-box">🧴</div>
+    <!-- Paper holder (right) -->
+    <div class="paper-holder-wrap">
+      <div class="paper-arm"></div>
+      <div class="paper-roll-outer"><div class="paper-roll-inner"></div></div>
+      <div class="paper-tail"></div>
+    </div>
+    <!-- Floor -->
+    <div class="scene-floor"></div>
+    <!-- Duang -->
+    <div class="duang duang-l">duang~</div>
+    <div class="duang duang-r">duang~</div>
+    <!-- Character image -->
+    <div class="character-wrap" id="char-wrap">
+      <img
+        src="./assets/character.png"
+        alt="便便小人"
+        class="character-img"
+        id="char-img"
+        onerror="this.style.display='none'; document.getElementById('char-fb').style.display='block';"
+      >
+      <div class="char-fallback" id="char-fb">🧒</div>
+    </div>
+    <!-- Speech bubble -->
+    <div class="speech-bubble" id="speech-bubble">
+      点击开始<br>计时吧！
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="action-row">
+    <button class="btn btn-start btn-img" id="btn-start" onclick="handleStart()">
+      <img src="./assets/picture/start.png" alt="开始" class="btn-img-icon">
+    </button>
+    <button class="btn btn-end btn-img" id="btn-end" onclick="handleEnd()" disabled>
+      <img src="./assets/picture/end.png" alt="结束" class="btn-img-icon">
+    </button>
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="cards-row">
+    <!-- Today count -->
+    <div class="card yellow">
+      <div class="card-hd">⭐ 今日次数</div>
+      <div class="card-val-row">
+        <div class="card-val" id="today-count">0</div>
+        <div class="card-unit">次</div>
+      </div>
+      <div class="card-sub up" id="count-compare">--</div>
+    </div>
+    <!-- Avg duration -->
+    <div class="card">
+      <div class="card-hd">🕐 平均时长</div>
+      <div class="card-val-sm" id="avg-display">--:--</div>
+      <div class="card-sub down" id="avg-compare">--</div>
+    </div>
+    <!-- Blind box -->
+    <div class="card purple">
+      <div class="card-hd">🎁 盲盒掉落</div>
+      <div class="box-inner">
+        <div class="box-emoji">📦</div>
+        <div class="box-info">
+          <div class="box-label">今日可开启</div>
+          <div class="box-num"><span id="box-count">0</span> <span style="font-size:.7rem;font-weight:700">个</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENCOURAGE BAR -->
+  <div class="encourage">
+    <div class="encourage-ico">👑💩</div>
+    <div class="encourage-txt" id="encourage-text">坚持记录，你的肠道会越来越顺畅哦！💪</div>
+    <div class="encourage-arrow">›</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-tab active" id="tab-0" onclick="switchTab(0)">
+      <div class="tab-inner">
+        <div class="tab-ico">🏠</div>
+        <div class="tab-lbl">首页</div>
+      </div>
+    </div>
+    <div class="nav-tab" id="tab-1" onclick="switchTab(1)">
+      <div class="tab-inner">
+        <div class="tab-ico">📖</div>
+        <div class="tab-lbl">图鉴</div>
+      </div>
+    </div>
+    <div class="nav-tab" id="tab-2" onclick="switchTab(2)">
+      <div class="tab-inner">
+        <div class="tab-ico">📋</div>
+        <div class="tab-lbl">记录</div>
+      </div>
+    </div>
+    <div class="nav-tab" id="tab-3" onclick="switchTab(3)">
+      <div class="tab-inner">
+        <div class="tab-ico">👤</div>
+        <div class="tab-lbl">我的</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+try {
+// ===== STORAGE =====
+const DB = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem('bd_'+k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem('bd_'+k, JSON.stringify(v)); } catch {} },
+};
+
+// ===== STATE =====
+const S = {
+  status: 'idle',   // idle | running | done
+  start: null,
+  elapsed: 0,
+  interval: null,
+};
+
+const PHRASES = [
+  '嗯嗯～\n顺畅+1！', '好棒！\n肠道满意！', '完美！\n带薪如厕！',
+  '放松一下\n慢慢来～', '今天也\n很顺畅！', '嗯！\n使劲！',
+];
+const ENCOURAGES = [
+  '坚持记录，你的肠道会越来越顺畅哦！💪',
+  '规律如厕是健康生活的第一步 🌿',
+  '今天有没有好好补充水分呀？💧',
+  '多吃蔬菜，便便会更顺畅哦～🥦',
+  '你是今天最认真的如厕达人！🏆',
+];
+
+// ===== TIMER =====
+function fmt(sec) {
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+}
+
+function handleStart() {
+  if (S.status === 'running') return;
+  S.status = 'running';
+  S.start = Date.now();
+  S.elapsed = 0;
+  document.getElementById('timer-display').textContent = '00:00';
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-end').disabled = false;
+  document.getElementById('scene').classList.add('running');
+  document.getElementById('speech-bubble').innerHTML = PHRASES[Math.floor(Math.random()*PHRASES.length)].replace('\n','<br>');
+  S.interval = setInterval(() => {
+    S.elapsed = Math.floor((Date.now() - S.start) / 1000);
+    document.getElementById('timer-display').textContent = fmt(S.elapsed);
+  }, 500);
+}
+
+function handleEnd() {
+  if (S.status !== 'running') return;
+  clearInterval(S.interval);
+  S.status = 'done';
+  S.elapsed = Math.floor((Date.now() - S.start) / 1000);
+  document.getElementById('timer-display').textContent = fmt(S.elapsed);
+  document.getElementById('btn-end').disabled = true;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('scene').classList.remove('running');
+  document.getElementById('speech-bubble').innerHTML = '完成啦！<br>💩掉落中';
+  saveRecord(S.elapsed);
+  showToast('🎉 一次便便时长：' + fmt(S.elapsed) + '，盲盒已放入背包！');
+  S.status = 'idle';
+  setTimeout(() => {
+    document.getElementById('speech-bubble').innerHTML = '点击开始<br>计时吧！';
+  }, 3000);
+}
+
+// ===== SAVE =====
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function saveRecord(sec) {
+  const today = todayKey();
+  const records = DB.get('records', []);
+  records.unshift({ date: today, sec, ts: Date.now() });
+  DB.set('records', records.slice(0, 200));
+  // boxes
+  const boxes = DB.get('boxes', 0);
+  DB.set('boxes', boxes + 1);
+  refreshStats();
+}
+
+function refreshStats() {
+  const today = todayKey();
+  const records = DB.get('records', []);
+  const todayRecs = records.filter(r => r.date === today);
+  const count = todayRecs.length;
+  // Today count
+  document.getElementById('today-count').textContent = count;
+  // Yesterday count
+  const yd = new Date(); yd.setDate(yd.getDate()-1);
+  const yKey = `${yd.getFullYear()}${String(yd.getMonth()+1).padStart(2,'0')}${String(yd.getDate()).padStart(2,'0')}`;
+  const yCount = records.filter(r => r.date === yKey).length;
+  const diff = count - yCount;
+  const cSub = document.getElementById('count-compare');
+  if (yCount > 0) {
+    cSub.textContent = (diff >= 0 ? '比昨天 +' : '比昨天 ') + diff;
+    cSub.className = 'card-sub ' + (diff >= 0 ? 'up' : 'down');
+  } else {
+    cSub.textContent = count > 0 ? `今日第${count}次` : '今天还没开始';
+    cSub.className = 'card-sub';
+  }
+  // Avg
+  if (todayRecs.length > 0) {
+    const avg = Math.round(todayRecs.reduce((a,r) => a+r.sec, 0) / todayRecs.length);
+    document.getElementById('avg-display').textContent = fmt(avg);
+    if (yCount > 0) {
+      const yAvg = Math.round(records.filter(r => r.date === yKey).reduce((a,r) => a+r.sec, 0) / yCount);
+      const adiff = avg - yAvg;
+      const aEl = document.getElementById('avg-compare');
+      aEl.textContent = '比昨天 ' + (adiff >= 0 ? '+' : '') + fmt(Math.abs(adiff));
+      aEl.className = 'card-sub ' + (adiff <= 0 ? 'up' : 'down');
+    } else {
+      document.getElementById('avg-compare').textContent = '今日平均';
+    }
+  } else {
+    document.getElementById('avg-display').textContent = '--:--';
+    document.getElementById('avg-compare').textContent = '暂无记录';
+  }
+  // Box count
+  document.getElementById('box-count').textContent = DB.get('boxes', 0);
+  // Encourage
+  const phrases = ENCOURAGES;
+  document.getElementById('encourage-text').textContent = phrases[count % phrases.length];
+}
+
+// ===== TAB SWITCH =====
+function switchTab(n) {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('tab-'+i).classList.toggle('active', i === n);
+  }
+  if (n !== 0) showToast(['首页','图鉴','记录','我的'][n] + ' 页面建设中 🚧');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ===== INIT =====
+refreshStats();
+
+} catch(e) {
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:24px;text-align:center;
+      font-size:1.1rem;color:#c00;flex-direction:column;gap:12px;">
+      <div style="font-size:3rem">💩</div>
+      哎呀，出错了，请刷新试试吧~<br>
+      <small style="color:#999;font-size:.8rem">${e.message}</small>
+    </div>`;
+}
+</script>
+</body>
+</html>
