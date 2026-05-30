@@ -701,13 +701,23 @@ body {
   z-index: 1;
 }
 .particle.play { opacity: 1; animation: particle-fly 0.55s ease-out forwards; }
+.drop-poop.has-image {
+  width: 172px;
+  height: 172px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+}
+.drop-poop img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
 .drop-poop {
   position: absolute;
   left: 50%;
-  top: 12%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
   opacity: 0;
   z-index: 3;
   filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.18));
@@ -830,6 +840,16 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.result-emoji.has-image {
+  padding: 4px;
+  font-size: 0;
+}
+.result-emoji img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 .result-emoji {
   width: 56px;
@@ -1190,11 +1210,11 @@ body {
   100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
 }
 @keyframes poop-fall {
-  0% { transform: translateX(-50%) translateY(-140px) scale(0.95); }
-  60% { transform: translateX(-50%) translateY(160px) scale(1.05); }
-  78% { transform: translateX(-50%) translateY(120px) scale(0.98); }
-  90% { transform: translateX(-50%) translateY(160px) scale(1.02); }
-  100% { transform: translateX(-50%) translateY(150px) scale(1); }
+  0% { transform: translate(-50%, -50%) translateY(-200px) scale(0.95); }
+  60% { transform: translate(-50%, -50%) translateY(20px) scale(1.05); }
+  78% { transform: translate(-50%, -50%) translateY(-10px) scale(0.98); }
+  90% { transform: translate(-50%, -50%) translateY(8px) scale(1.02); }
+  100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
 }
 </style>
 </head>
@@ -1593,10 +1613,53 @@ function updateRunningTease(sec) {
   }
 }
 
-function pickByRarity(rarity) {
-  const list = POOP_DATABASE.filter(p => p.rarity === rarity);
-  if (list.length === 0) return randomPick(POOP_DATABASE);
-  return randomPick(list);
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+function renderDropVisual(el, item) {
+  el.className = 'drop-poop';
+  el.setAttribute('aria-label', item.name || 'drop result');
+  el.textContent = '';
+
+  if (item.image) {
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.name || 'drop result';
+    el.appendChild(img);
+    el.classList.add('has-image');
+    return;
+  }
+
+  el.textContent = item.emoji || '💩';
+}
+
+function renderResultVisual(item) {
+  const el = document.getElementById('result-emoji');
+  el.className = 'result-emoji';
+  el.textContent = '';
+  el.setAttribute('aria-label', item.name || '掉落结果');
+
+  if (item.image) {
+    const img = document.createElement('img');
+    img.src = item.image;
+    img.alt = item.name || '掉落结果';
+    el.appendChild(img);
+    el.classList.add('has-image');
+    return;
+  }
+
+  el.textContent = item.emoji || '💩';
+}
+
+function pickDropResult() {
+  const pool = [
+    { emoji: '💩', name: '经典便便', desc: '复古经典，永不过时。' },
+    { emoji: '💩✨', name: '闪亮便便', desc: '自带高光，今天气色不错。' },
+    { image: 'assets/group-warm-ball.svg', name: '抱团取暖球', desc: '暖乎乎挤成一团，陪你一起庆祝通畅时刻。' },
+    { emoji: '💩🌈', name: '彩虹便便', desc: '色彩丰富，心情也一起变好。' },
+    { emoji: '💩👑', name: '加冕便便', desc: '王者气场，闪闪发光。' },
+    { emoji: '💩🔥', name: '热乎便便', desc: '刚出炉，注意文明围观。' },
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function normalizeProb(p) {
@@ -1720,7 +1783,7 @@ function showEndOverlay() {
   card.classList.remove('show');
 
   box.className = 'mystery-box';
-  poopEl.className = 'drop-poop';
+  renderDropVisual(poop, result);
 
   stage.querySelectorAll('.particle').forEach(p => p.remove());
 
@@ -1757,6 +1820,19 @@ function showEndOverlay() {
   setTimeout(() => {
     finalizeAndShowCard();
   }, 3000);
+}
+
+function finalizeSessionAndShowCard(elapsed) {
+  const item = S.pendingDrop;
+  if (!item) return;
+  saveRecord(elapsed, item.pointsGain);
+  document.getElementById('result-duration').textContent = fmt(elapsed);
+  document.getElementById('result-points').textContent = String(item.pointsGain);
+  renderResultVisual(item);
+  document.getElementById('result-name').textContent = item.name;
+  document.getElementById('result-desc').textContent = item.desc;
+
+  document.getElementById('result-card').classList.add('show');
 }
 
 function hideEndOverlay() {
