@@ -160,7 +160,22 @@ export function createDraw({ showToast }) {
     });
 
     document.getElementById('btn-draw-poop')?.addEventListener('click', open);
+
+    document.querySelectorAll('#draw-undo, #draw-save').forEach(applyWobble);
   };
 
   return { init, open, close };
 }
+
+const applyWobble = (el) => {
+  const text = el.childNodes[0]?.textContent?.trim();
+  if (!text) return;
+  el.innerHTML = '';
+  for (let i = 0; i < text.length; i++) {
+    const span = document.createElement('span');
+    span.textContent = text[i];
+    span.style.display = 'inline-block';
+    span.style.transform = `rotate(${i % 2 === 0 ? '-' : '+'}2.5deg)`;
+    el.appendChild(span);
+  }
+};

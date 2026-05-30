@@ -9,6 +9,8 @@ import { createAtlas } from './atlas.js';
 import { createDrop } from './drop.js';
 import { createTabs } from './tabs.js';
 import { createDraw } from './draw.js';
+import { createPoster } from './poster.js';
+import { createSettings } from './settings.js';
 
 try {
   const storage = createStorage();
@@ -85,6 +87,7 @@ try {
     banner.renderBanner();
     atlas.renderAtlas();
     records.renderRecords();
+    records.renderCalendar();
   };
 
   const drop = createDrop({
@@ -101,13 +104,28 @@ try {
 
   const tabs = createTabs({
     onEnterAtlas: atlas.renderAtlas,
-    onEnterRecords: records.renderRecords,
+    onEnterRecords: () => {
+      records.renderCalendar();
+      records.renderRecords();
+    },
   });
 
   const draw = createDraw({
     showToast: toast.showToast,
   });
   draw.init();
+
+  const poster = createPoster({
+    getRecords: records.getRecords,
+    getStreakDays: banner.getStreakDays,
+    showToast: toast.showToast,
+  });
+  window.handlePosterSave = poster.handlePosterSave;
+  window.handlePosterClose = poster.handlePosterClose;
+  document.getElementById('btn-summary')?.addEventListener('click', () => poster.handleSummary());
+
+  const settings = createSettings({ storage });
+  settings.init();
 
   banner.ensureStreakOnLoad({ todayYMD: utils.todayYMD, yesterdayYMD: utils.yesterdayYMD });
   banner.renderBanner();
