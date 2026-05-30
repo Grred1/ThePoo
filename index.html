@@ -442,11 +442,11 @@ body {
 
 /* ===== ACTION BUTTONS ===== */
 .action-row {
-  display: flex; gap: 12px;
+  display: flex; gap: 10px;
   padding: 0 14px 9px;
 }
 .btn {
-  flex: 1; height: 88px;
+  flex: 1; min-width: 0;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -461,8 +461,14 @@ body {
 .btn-end:active:not(:disabled) { transform: scale(0.93); }
 .btn:disabled { opacity: 0.38; cursor: default; }
 .btn-icon { font-size: 16px; }
-.btn-img { padding: 0; overflow: visible; }
-.btn-img-icon { height: 88px; width: auto; object-fit: contain; }
+.btn-img { padding: 0; overflow: hidden; }
+.btn-img-icon {
+  max-width: 100%;
+  max-height: 88px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
 
 /* ===== INFO CARDS ===== */
 .cards-row {
