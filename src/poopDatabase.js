@@ -158,8 +158,8 @@ export const POOP_DATABASE = [
     emoji: '🔹💩❓',
     image: POOP_IMAGE_MAP.tiny_mystery,
     desc: '存在感极低，仿佛从未出现过。你是来擦屁股的吗？旁边打着一个巨大的问号。',
-    trigger: '单次计时 < 1分钟',
-    triggerFn: { type: 'duration_under', seconds: 60 },
+    trigger: '单次计时 < 5秒',
+    triggerFn: { type: 'duration_under', seconds: 5 },
   },
   {
     id: 'long_wait',

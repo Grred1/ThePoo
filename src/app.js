@@ -10,6 +10,7 @@ import { createDrop } from './drop.js';
 import { createTabs } from './tabs.js';
 import { createDraw } from './draw.js';
 import { createPoster } from './poster.js';
+import { createSettings } from './settings.js';
 
 try {
   const storage = createStorage();
@@ -122,6 +123,9 @@ try {
   window.handlePosterSave = poster.handlePosterSave;
   window.handlePosterClose = poster.handlePosterClose;
   document.getElementById('btn-summary')?.addEventListener('click', () => poster.handleSummary());
+
+  const settings = createSettings({ storage });
+  settings.init();
 
   banner.ensureStreakOnLoad({ todayYMD: utils.todayYMD, yesterdayYMD: utils.yesterdayYMD });
   banner.renderBanner();

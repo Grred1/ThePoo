@@ -1396,9 +1396,6 @@ body {
 
   <div class="view" id="view-me">
     <div class="panel">
-      <div class="panel-title">
-        <div>我的</div>
-      </div>
       <button class="draw-btn" id="btn-draw-poop" type="button">我的大便不服！！！</button>
       <button class="draw-btn summary-btn" id="btn-summary" type="button">📊 总结</button>
     </div>
@@ -1483,9 +1480,6 @@ body {
 <!-- Draw Overlay -->
 <div class="overlay" id="draw-overlay" aria-hidden="true">
   <div class="overlay-panel draw-panel">
-    <div class="draw-header">
-      <button class="modal-close" id="draw-close" type="button">✕</button>
-    </div>
     <div class="draw-tools">
       <div class="draw-tool-group">
         <button class="draw-color-btn active" data-color="#5C3A1E" style="background:#5C3A1E" aria-label="棕色"></button>
@@ -1498,18 +1492,17 @@ body {
         <button class="draw-size-btn" data-size="8" aria-label="中">中</button>
         <button class="draw-size-btn" data-size="14" aria-label="粗">粗</button>
       </div>
+      <button class="modal-close draw-close-btn" id="draw-close" type="button">✕</button>
     </div>
     <div class="draw-canvas-wrap">
       <canvas id="draw-canvas"></canvas>
     </div>
     <div class="draw-actions">
       <button class="draw-action-btn undo" id="draw-undo" type="button">
-        撤销
-        <span class="draw-hint small">大便还没画好</span>
+        大便还没画好[囧]
       </button>
       <button class="draw-action-btn save" id="draw-save" type="button">
-        确定
-        <span class="draw-hint large">大便很满意！</span>
+        懂不懂大便之神的含金量啊[笑]
       </button>
     </div>
   </div>
@@ -1563,6 +1556,37 @@ body {
     </div>
     <div class="poster-scroll" id="poster-container"></div>
     <button class="poster-save-btn" id="poster-save" type="button" onclick="window.handlePosterSave()">💾 保存到本地</button>
+  </div>
+</div>
+
+<!-- Settings Overlay -->
+<div class="overlay" id="settings-overlay" aria-hidden="true">
+  <div class="overlay-panel settings-panel">
+    <div class="panel">
+      <div class="settings-header">
+        <div class="settings-title">⚙️ 设置</div>
+        <button class="modal-close" id="settings-close" type="button">✕</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="settings-label">🔊 音量大小</div>
+      <div class="settings-slider-row">
+        <span class="settings-slider-icon">🔈</span>
+        <input class="settings-slider" id="volume-slider" type="range" min="0" max="100" value="70">
+        <span class="settings-slider-icon" id="volume-icon">🔊</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="settings-label">🎵 背景音乐</div>
+      <div class="settings-select-wrap">
+        <select class="settings-select" id="music-select">
+          <option value="musicA">音乐A</option>
+          <option value="musicB">音乐B</option>
+          <option value="musicC">音乐C</option>
+        </select>
+        <div class="settings-select-arrow">▼</div>
+      </div>
+    </div>
   </div>
 </div>
 
