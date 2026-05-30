@@ -98,6 +98,83 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* ===== BANNER ===== */
+.banner {
+  margin: 0 14px 10px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  padding: 10px 12px 10px;
+  box-shadow: 4px 4px 0 var(--brown-light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.banner-chip {
+  height: 34px;
+  padding: 0 12px;
+  background: var(--yellow-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--brown);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.banner-chip:active { transform: scale(0.98); }
+.banner-chip.secondary { background: var(--mint-bg); }
+.banner-chip .muted { color: var(--text-mid); font-weight: 800; }
+.banner-progress {
+  flex: 1 1 140px;
+  min-width: 140px;
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 14px;
+  padding: 8px 10px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+}
+.banner-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.banner-progress-label {
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: var(--text-mid);
+  letter-spacing: 0.8px;
+}
+.banner-progress-val {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--brown);
+  font-variant-numeric: tabular-nums;
+}
+.progress-bar {
+  height: 12px;
+  background: #F3E7D6;
+  border: 2px solid var(--brown);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.06);
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--mint) 0%, #88D5B6 55%, var(--yellow) 100%);
+  border-right: 2px solid rgba(92,58,30,0.25);
+  transition: width 0.25s ease;
+}
+
 /* ===== TIMER CARD ===== */
 .timer-card {
   margin: 0 14px 8px;
@@ -502,6 +579,247 @@ body {
 .toast.show {
   opacity: 1; transform: translateX(-50%) translateY(0);
 }
+
+/* ===== RUNNING DROP (15min) ===== */
+.scene-box-drop {
+  position: absolute;
+  left: 50%;
+  top: -70px;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  background: var(--purple-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  box-shadow: 3px 3px 0 var(--brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+.scene-box-drop.play {
+  opacity: 1;
+  animation: scene-drop 3s ease-in-out forwards;
+}
+@keyframes scene-drop {
+  0% { transform: translateX(-50%) translateY(-10px) rotate(-8deg) scale(0.96); opacity: 0; }
+  12% { opacity: 1; }
+  55% { transform: translateX(-50%) translateY(155px) rotate(10deg) scale(1.03); }
+  72% { transform: translateX(-50%) translateY(140px) rotate(-6deg) scale(1.02); }
+  100% { transform: translateX(-50%) translateY(155px) rotate(0deg) scale(1); opacity: 0; }
+}
+
+/* ===== END SEQUENCE OVERLAY ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(92,58,30,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+.overlay-panel {
+  width: min(360px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.stage {
+  width: 100%;
+  height: 320px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 24px;
+  box-shadow: 5px 5px 0 var(--brown-light);
+  position: relative;
+  overflow: hidden;
+}
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(255,248,232,0.85) 0%, transparent 55%),
+    radial-gradient(circle at 80% 90%, rgba(245,232,200,0.75) 0%, transparent 55%);
+  pointer-events: none;
+}
+.mystery-box {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  width: 92px;
+  height: 92px;
+  background: var(--purple-bg);
+  border: 3px solid var(--brown);
+  border-radius: 20px;
+  box-shadow: 5px 5px 0 var(--brown);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  z-index: 2;
+}
+.mystery-box.shake1 { animation: box-shake 0.11s linear infinite; }
+.mystery-box.shake2 {
+  animation: box-shake 0.06s linear infinite, box-glow 0.5s ease-in-out infinite;
+  box-shadow: 5px 5px 0 var(--brown), 0 0 0 0 rgba(232,117,140,0.0);
+}
+.mystery-box.burst { animation: box-burst 0.5s ease-in-out forwards; }
+.particle {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid var(--brown);
+  box-shadow: 2px 2px 0 rgba(92,58,30,0.12);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  z-index: 1;
+}
+.particle.play { opacity: 1; animation: particle-fly 0.55s ease-out forwards; }
+.drop-poop {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  font-size: 72px;
+  opacity: 0;
+  z-index: 3;
+  filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.18));
+}
+.drop-poop.play { opacity: 1; animation: poop-fall 1s cubic-bezier(.2,.8,.2,1) forwards; }
+.result-card {
+  width: 100%;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 22px;
+  box-shadow: 4px 4px 0 var(--brown-light);
+  padding: 12px 12px 10px;
+  display: none;
+}
+.result-card.show { display: block; }
+.result-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.result-title {
+  font-size: 0.86rem;
+  font-weight: 900;
+  color: var(--brown);
+  letter-spacing: 1px;
+}
+.result-meta {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.result-main {
+  background: var(--yellow-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.result-emoji {
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  flex-shrink: 0;
+}
+.result-texts { display: flex; flex-direction: column; gap: 3px; }
+.result-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--brown);
+  line-height: 1;
+}
+.result-desc {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+.result-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn-mini {
+  height: 44px;
+  background: var(--mint-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--brown);
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.btn-mini:active { transform: scale(0.98); }
+.btn-mini.secondary { background: var(--purple-bg); }
+.btn-mini.small {
+  grid-column: 1 / -1;
+  height: 38px;
+  background: #fff;
+  font-size: 0.72rem;
+  box-shadow: 2px 2px 0 var(--brown-light);
+}
+
+@keyframes box-shake {
+  0% { transform: translate(-50%, -50%) translateX(-10px) rotate(-2deg); }
+  25% { transform: translate(-50%, -50%) translateX(10px) rotate(2deg); }
+  50% { transform: translate(-50%, -50%) translateX(-8px) rotate(-1deg); }
+  75% { transform: translate(-50%, -50%) translateX(8px) rotate(1deg); }
+  100% { transform: translate(-50%, -50%) translateX(-10px) rotate(-2deg); }
+}
+@keyframes box-glow {
+  0%, 100% { box-shadow: 5px 5px 0 var(--brown), 0 0 0 0 rgba(232,117,140,0); }
+  50% { box-shadow: 5px 5px 0 var(--brown), 0 0 18px 6px rgba(232,117,140,0.55); }
+}
+@keyframes box-burst {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  65% { transform: translate(-50%, -50%) scale(1.8); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+@keyframes particle-fly {
+  0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.8); opacity: 0; }
+}
+@keyframes poop-fall {
+  0% { transform: translateX(-50%) translateY(-140px) scale(0.95); }
+  60% { transform: translateX(-50%) translateY(160px) scale(1.05); }
+  78% { transform: translateX(-50%) translateY(120px) scale(0.98); }
+  90% { transform: translateX(-50%) translateY(160px) scale(1.02); }
+  100% { transform: translateX(-50%) translateY(150px) scale(1); }
+}
 </style>
 </head>
 <body>
@@ -523,6 +841,23 @@ body {
 
   <!-- SUBTITLE -->
   <div class="subtitle">我们的便便时长 ✨</div>
+
+  <div class="banner" id="banner">
+    <button class="banner-chip secondary" id="streak-chip" type="button" onclick="showStreakTip()">
+      🔥 连续打卡 <span id="streak-days">0</span><span class="muted">天</span>
+    </button>
+    <button class="banner-chip" id="weather-chip" type="button" onclick="cycleWeather()">
+      <span id="weather-emoji">⛅️</span>
+      <span id="weather-text">多云</span>
+    </button>
+    <div class="banner-progress" aria-label="积分池">
+      <div class="banner-progress-top">
+        <div class="banner-progress-label">积分池</div>
+        <div class="banner-progress-val"><span id="points-now">0</span>/<span id="points-goal">100</span></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="points-fill"></div></div>
+    </div>
+  </div>
 
   <!-- TIMER CARD -->
   <div class="timer-card">
@@ -581,6 +916,7 @@ body {
     <div class="speech-bubble" id="speech-bubble">
       点击开始<br>计时吧！
     </div>
+    <div class="scene-box-drop" id="scene-box-drop" aria-hidden="true">🎁</div>
   </div>
 
   <!-- ACTION BUTTONS -->
@@ -659,6 +995,33 @@ body {
   </div>
 </div>
 
+<div class="overlay" id="drop-overlay" aria-hidden="true">
+  <div class="overlay-panel">
+    <div class="stage" id="drop-stage">
+      <div class="mystery-box" id="mystery-box" aria-label="mystery box">🎁</div>
+      <div class="drop-poop" id="drop-poop" aria-label="drop result">💩</div>
+    </div>
+    <div class="result-card" id="result-card" role="dialog" aria-label="掉落结果">
+      <div class="result-top">
+        <div class="result-title">盲盒掉落结果</div>
+        <div class="result-meta">时长 <span id="result-duration">--:--</span> · +<span id="result-points">0</span> 积分</div>
+      </div>
+      <div class="result-main">
+        <div class="result-emoji" id="result-emoji">💩</div>
+        <div class="result-texts">
+          <div class="result-name" id="result-name">今日便便</div>
+          <div class="result-desc" id="result-desc">恭喜你，掉落了一份闪亮的快乐。</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-mini" type="button" onclick="handleViewNote()">查看讯息纸条 📜</button>
+        <button class="btn-mini secondary" type="button" onclick="handleAddToAtlas()">收入图鉴 📖</button>
+        <button class="btn-mini small" type="button" onclick="handleAgain()">再来一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -676,6 +1039,9 @@ const S = {
   start: null,
   elapsed: 0,
   interval: null,
+  teaseKey: null,
+  fifteenShown: false,
+  pendingDrop: null,
 };
 
 const PHRASES = [
@@ -695,19 +1061,239 @@ function fmt(sec) {
   return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
 }
 
+const WEATHERS = [
+  { t: '晴天', e: '☀️' },
+  { t: '多云', e: '⛅️' },
+  { t: '阴天', e: '☁️' },
+  { t: '大风', e: '🌬️' },
+  { t: '雨天', e: '🌧️' },
+  { t: '雷雨', e: '⛈️' },
+];
+
+const POINTS_GOAL = 100;
+
+function dateKeyFromDate(d) {
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function todayKey() {
+  return dateKeyFromDate(new Date());
+}
+
+function getWeatherIndexForToday() {
+  const today = todayKey();
+  const w = DB.get('weather', {});
+  if (w && w.date === today && Number.isFinite(w.idx)) return w.idx;
+  const idx = Math.floor(Math.random() * WEATHERS.length);
+  DB.set('weather', { date: today, idx });
+  return idx;
+}
+
+function setWeatherIndexForToday(idx) {
+  const today = todayKey();
+  DB.set('weather', { date: today, idx });
+}
+
+function renderWeather() {
+  const idx = getWeatherIndexForToday();
+  const w = WEATHERS[idx] ?? WEATHERS[1];
+  document.getElementById('weather-emoji').textContent = w.e;
+  document.getElementById('weather-text').textContent = w.t;
+}
+
+function cycleWeather() {
+  const idx = getWeatherIndexForToday();
+  const next = (idx + 1) % WEATHERS.length;
+  setWeatherIndexForToday(next);
+  renderWeather();
+  showToast('今日天气：' + (WEATHERS[next]?.t ?? ''));
+}
+
+function computeStreak(records) {
+  const days = new Set(records.map(r => r.date));
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = dateKeyFromDate(d);
+    if (!days.has(key)) break;
+    streak += 1;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+function renderStreak() {
+  const records = DB.get('records', []);
+  document.getElementById('streak-days').textContent = computeStreak(records);
+}
+
+function showStreakTip() {
+  const s = Number(document.getElementById('streak-days').textContent || 0);
+  if (s > 0) showToast('已连续打卡 ' + s + ' 天，继续保持！');
+  else showToast('今天还没打卡，先来一次吧～');
+}
+
+function getPoints() {
+  return Number(DB.get('points', 0)) || 0;
+}
+
+function setPoints(v) {
+  DB.set('points', Math.max(0, Math.floor(v)));
+}
+
+function renderPoints() {
+  const points = getPoints();
+  const now = points % POINTS_GOAL;
+  document.getElementById('points-goal').textContent = POINTS_GOAL;
+  document.getElementById('points-now').textContent = now;
+  document.getElementById('points-fill').style.width = Math.min(100, Math.max(0, (now / POINTS_GOAL) * 100)) + '%';
+}
+
+function renderBanner() {
+  renderWeather();
+  renderStreak();
+  renderPoints();
+}
+
+function teaseByElapsed(sec) {
+  if (sec < 60) return { key: 't0', html: '还在热身呢？' };
+  if (sec < 180) return { key: 't1', html: '进入状态了，好样的' };
+  if (sec < 480) return { key: 't2', html: '标准健康如厕，继续保持！' };
+  if (sec < 900) return { key: 't3', html: '有点久了，腿还好吗？' };
+  return { key: 't4', html: '腿麻了吧……<br>感觉得了' };
+}
+
+function playSceneDropOnce() {
+  const el = document.getElementById('scene-box-drop');
+  el.classList.remove('play');
+  void el.offsetWidth;
+  el.classList.add('play');
+  setTimeout(() => el.classList.remove('play'), 3050);
+}
+
+function updateRunningTease(sec) {
+  const t = teaseByElapsed(sec);
+  if (S.teaseKey !== t.key) {
+    S.teaseKey = t.key;
+    document.getElementById('speech-bubble').innerHTML = t.html;
+  }
+  if (!S.fifteenShown && sec >= 900) {
+    S.fifteenShown = true;
+    playSceneDropOnce();
+  }
+}
+
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+function pickDropResult() {
+  const pool = [
+    { emoji: '💩', name: '经典便便', desc: '复古经典，永不过时。' },
+    { emoji: '💩✨', name: '闪亮便便', desc: '自带高光，今天气色不错。' },
+    { emoji: '💩🌈', name: '彩虹便便', desc: '色彩丰富，心情也一起变好。' },
+    { emoji: '💩👑', name: '加冕便便', desc: '王者气场，闪闪发光。' },
+    { emoji: '💩🔥', name: '热乎便便', desc: '刚出炉，注意文明围观。' },
+  ];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function computePointsGain(sec) {
+  const base = Math.floor(sec / 30) + 6;
+  return clamp(base, 6, 36);
+}
+
+function showEndOverlay({ elapsed }) {
+  const overlay = document.getElementById('drop-overlay');
+  const box = document.getElementById('mystery-box');
+  const poop = document.getElementById('drop-poop');
+  const stage = document.getElementById('drop-stage');
+  const card = document.getElementById('result-card');
+
+  const pointsGain = computePointsGain(elapsed);
+  const result = pickDropResult();
+  S.pendingDrop = { ...result, pointsGain, elapsed };
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  card.classList.remove('show');
+
+  box.className = 'mystery-box';
+  poop.className = 'drop-poop';
+  poop.textContent = result.emoji;
+
+  stage.querySelectorAll('.particle').forEach(p => p.remove());
+
+  box.classList.add('shake1');
+  setTimeout(() => {
+    box.classList.remove('shake1');
+    box.classList.add('shake2');
+  }, 500);
+
+  setTimeout(() => {
+    box.classList.remove('shake2');
+    box.classList.add('burst');
+    const count = 6 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const colors = ['#F5CC60', '#6DBF9E', '#E8758C', '#C49A6C', '#B8E4CC', '#EAD5F5'];
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+      const dist = 70 + Math.random() * 55;
+      const dx = Math.round(Math.cos(angle) * dist);
+      const dy = Math.round(Math.sin(angle) * dist);
+      p.style.setProperty('--dx', dx + 'px');
+      p.style.setProperty('--dy', dy + 'px');
+      stage.appendChild(p);
+      requestAnimationFrame(() => p.classList.add('play'));
+    }
+  }, 1500);
+
+  setTimeout(() => {
+    poop.classList.add('play');
+  }, 2000);
+
+  setTimeout(() => {
+    finalizeSessionAndShowCard(elapsed);
+  }, 3000);
+}
+
+function finalizeSessionAndShowCard(elapsed) {
+  const item = S.pendingDrop;
+  if (!item) return;
+  saveRecord(elapsed, item.pointsGain);
+  document.getElementById('result-duration').textContent = fmt(elapsed);
+  document.getElementById('result-points').textContent = String(item.pointsGain);
+  document.getElementById('result-emoji').textContent = item.emoji;
+  document.getElementById('result-name').textContent = item.name;
+  document.getElementById('result-desc').textContent = item.desc;
+
+  document.getElementById('result-card').classList.add('show');
+}
+
+function hideEndOverlay() {
+  const overlay = document.getElementById('drop-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
 function handleStart() {
   if (S.status === 'running') return;
   S.status = 'running';
   S.start = Date.now();
   S.elapsed = 0;
+  S.teaseKey = null;
+  S.fifteenShown = false;
+  S.pendingDrop = null;
   document.getElementById('timer-display').textContent = '00:00';
   document.getElementById('btn-start').disabled = true;
   document.getElementById('btn-end').disabled = false;
   document.getElementById('scene').classList.add('running');
-  document.getElementById('speech-bubble').innerHTML = PHRASES[Math.floor(Math.random()*PHRASES.length)].replace('\n','<br>');
+  document.getElementById('speech-bubble').innerHTML = '还在热身呢？';
+  hideEndOverlay();
   S.interval = setInterval(() => {
     S.elapsed = Math.floor((Date.now() - S.start) / 1000);
     document.getElementById('timer-display').textContent = fmt(S.elapsed);
+    updateRunningTease(S.elapsed);
   }, 500);
 }
 
@@ -720,27 +1306,17 @@ function handleEnd() {
   document.getElementById('btn-end').disabled = true;
   document.getElementById('btn-start').disabled = false;
   document.getElementById('scene').classList.remove('running');
-  document.getElementById('speech-bubble').innerHTML = '完成啦！<br>💩掉落中';
-  saveRecord(S.elapsed);
-  showToast('🎉 一次便便时长：' + fmt(S.elapsed) + '，盲盒已放入背包！');
-  S.status = 'idle';
-  setTimeout(() => {
-    document.getElementById('speech-bubble').innerHTML = '点击开始<br>计时吧！';
-  }, 3000);
+  document.getElementById('speech-bubble').innerHTML = '结束结算中…';
+  showEndOverlay({ elapsed: S.elapsed });
 }
 
 // ===== SAVE =====
-function todayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function saveRecord(sec) {
+function saveRecord(sec, pointsGain = 0) {
   const today = todayKey();
   const records = DB.get('records', []);
   records.unshift({ date: today, sec, ts: Date.now() });
   DB.set('records', records.slice(0, 200));
-  // boxes
+  setPoints(getPoints() + (Number(pointsGain) || 0));
   const boxes = DB.get('boxes', 0);
   DB.set('boxes', boxes + 1);
   refreshStats();
@@ -788,6 +1364,7 @@ function refreshStats() {
   // Encourage
   const phrases = ENCOURAGES;
   document.getElementById('encourage-text').textContent = phrases[count % phrases.length];
+  renderBanner();
 }
 
 // ===== TAB SWITCH =====
@@ -808,6 +1385,33 @@ function showToast(msg) {
 
 // ===== INIT =====
 refreshStats();
+renderBanner();
+
+function handleAgain() {
+  hideEndOverlay();
+  document.getElementById('speech-bubble').innerHTML = '点击开始<br>计时吧！';
+  S.status = 'idle';
+  S.pendingDrop = null;
+}
+
+function handleViewNote() {
+  const tips = [
+    '纸条写着：少刷手机，多喝水。',
+    '纸条写着：深呼吸三次，放轻松。',
+    '纸条写着：别蹲太久，腿真的会麻。',
+    '纸条写着：今天也要吃点蔬菜哦～',
+  ];
+  showToast(tips[Math.floor(Math.random() * tips.length)]);
+}
+
+function handleAddToAtlas() {
+  const item = S.pendingDrop;
+  if (!item) { showToast('还没有掉落结果'); return; }
+  const atlas = DB.get('atlas', []);
+  atlas.unshift({ ...item, ts: Date.now() });
+  DB.set('atlas', atlas.slice(0, 100));
+  showToast('已收入图鉴：' + item.name);
+}
 
 } catch(e) {
   document.body.innerHTML = `
