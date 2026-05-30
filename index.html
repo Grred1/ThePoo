@@ -648,7 +648,7 @@ body {
 }
 .stage {
   width: 100%;
-  height: 320px;
+  height: 200px;
   background: var(--card);
   border: 2.5px solid var(--brown);
   border-radius: 24px;
@@ -707,8 +707,8 @@ body {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 172px;
-  height: 172px;
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1408,6 +1408,7 @@ body {
         <div class="meta">建设中</div>
       </div>
       <div class="record-note">这里后续可以放：成就、设置、数据导出等。</div>
+      <button class="draw-btn" id="btn-draw-poop" type="button">我的大便不服！！！</button>
     </div>
   </div>
 
@@ -1483,6 +1484,41 @@ body {
         <div class="modal-row">触发条件：<span class="v" id="modal-trigger">--</span></div>
         <div class="modal-row">收集时间：<span class="v" id="modal-time">--</span></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Draw Overlay -->
+<div class="overlay" id="draw-overlay" aria-hidden="true">
+  <div class="overlay-panel draw-panel">
+    <div class="draw-header">
+      <button class="modal-close" id="draw-close" type="button">✕</button>
+    </div>
+    <div class="draw-tools">
+      <div class="draw-tool-group">
+        <button class="draw-color-btn active" data-color="#5C3A1E" style="background:#5C3A1E" aria-label="棕色"></button>
+        <button class="draw-color-btn" data-color="#8B5E3C" style="background:#8B5E3C" aria-label="浅棕"></button>
+        <button class="draw-color-btn" data-color="#C49A6C" style="background:#C49A6C" aria-label="米色"></button>
+        <button class="draw-color-btn" data-color="#F5CC60" style="background:#F5CC60" aria-label="黄色"></button>
+      </div>
+      <div class="draw-tool-group">
+        <button class="draw-size-btn active" data-size="4" aria-label="细">细</button>
+        <button class="draw-size-btn" data-size="8" aria-label="中">中</button>
+        <button class="draw-size-btn" data-size="14" aria-label="粗">粗</button>
+      </div>
+    </div>
+    <div class="draw-canvas-wrap">
+      <canvas id="draw-canvas"></canvas>
+    </div>
+    <div class="draw-actions">
+      <button class="draw-action-btn undo" id="draw-undo" type="button">
+        撤销
+        <span class="draw-hint small">大便还没画好</span>
+      </button>
+      <button class="draw-action-btn save" id="draw-save" type="button">
+        确定
+        <span class="draw-hint large">大便很满意！</span>
+      </button>
     </div>
   </div>
 </div>
