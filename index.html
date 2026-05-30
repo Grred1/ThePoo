@@ -1613,55 +1613,6 @@ function updateRunningTease(sec) {
   }
 }
 
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-
-function renderDropVisual(el, item) {
-  el.className = 'drop-poop';
-  el.setAttribute('aria-label', item.name || 'drop result');
-  el.textContent = '';
-
-  if (item.image) {
-    const img = document.createElement('img');
-    img.src = item.image;
-    img.alt = item.name || 'drop result';
-    el.appendChild(img);
-    el.classList.add('has-image');
-    return;
-  }
-
-  el.textContent = item.emoji || '💩';
-}
-
-function renderResultVisual(item) {
-  const el = document.getElementById('result-emoji');
-  el.className = 'result-emoji';
-  el.textContent = '';
-  el.setAttribute('aria-label', item.name || '掉落结果');
-
-  if (item.image) {
-    const img = document.createElement('img');
-    img.src = item.image;
-    img.alt = item.name || '掉落结果';
-    el.appendChild(img);
-    el.classList.add('has-image');
-    return;
-  }
-
-  el.textContent = item.emoji || '💩';
-}
-
-function pickDropResult() {
-  const pool = [
-    { emoji: '💩', name: '经典便便', desc: '复古经典，永不过时。' },
-    { emoji: '💩✨', name: '闪亮便便', desc: '自带高光，今天气色不错。' },
-    { image: 'assets/group-warm-ball.svg', name: '抱团取暖球', desc: '暖乎乎挤成一团，陪你一起庆祝通畅时刻。' },
-    { emoji: '💩🌈', name: '彩虹便便', desc: '色彩丰富，心情也一起变好。' },
-    { emoji: '💩👑', name: '加冕便便', desc: '王者气场，闪闪发光。' },
-    { emoji: '💩🔥', name: '热乎便便', desc: '刚出炉，注意文明围观。' },
-  ];
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 function normalizeProb(p) {
   const keys = Object.keys(p);
   for (const k of keys) p[k] = Math.max(0, p[k]);
@@ -1777,13 +1728,18 @@ function showEndOverlay() {
   const poopEl = document.getElementById('drop-poop');
   const stage = document.getElementById('drop-stage');
   const card = document.getElementById('result-card');
+  const poopImg = document.getElementById('drop-poop-img');
 
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
   card.classList.remove('show');
 
   box.className = 'mystery-box';
-  renderDropVisual(poop, result);
+  poopEl.className = 'drop-poop';
+  if (S.pendingDrop?.poop?.image && poopImg) {
+    poopImg.src = S.pendingDrop.poop.image;
+    poopImg.alt = S.pendingDrop.poop.name;
+  }
 
   stage.querySelectorAll('.particle').forEach(p => p.remove());
 
@@ -1820,19 +1776,6 @@ function showEndOverlay() {
   setTimeout(() => {
     finalizeAndShowCard();
   }, 3000);
-}
-
-function finalizeSessionAndShowCard(elapsed) {
-  const item = S.pendingDrop;
-  if (!item) return;
-  saveRecord(elapsed, item.pointsGain);
-  document.getElementById('result-duration').textContent = fmt(elapsed);
-  document.getElementById('result-points').textContent = String(item.pointsGain);
-  renderResultVisual(item);
-  document.getElementById('result-name').textContent = item.name;
-  document.getElementById('result-desc').textContent = item.desc;
-
-  document.getElementById('result-card').classList.add('show');
 }
 
 function hideEndOverlay() {
