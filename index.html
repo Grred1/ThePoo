@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="color-scheme" content="light" />
+    <title>屎记 The Poo</title>
+    <style>
+      :root {
+        --bg0: #fbf5e9;
+        --bg1: #f3ead6;
+        --ink: #2b1f19;
+        --ink2: #4a342b;
+        --cream: #fff8ec;
+        --cream2: #f6e7cd;
+        --shadow: rgba(28, 20, 16, 0.18);
+        --shadow2: rgba(28, 20, 16, 0.28);
+        --accentA: #78d2b8;
+        --accentB: #ff9ac2;
+        --accentC: #ffe16d;
+        --danger: #ff6b6b;
+        --ok: #43b97f;
+        --radius: 18px;
+        --pad: 16px;
+        --safeT: env(safe-area-inset-top);
+        --safeB: env(safe-area-inset-bottom);
+        --safeL: env(safe-area-inset-left);
+        --safeR: env(safe-area-inset-right);
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        width: 100%; height: 100%;
+        margin: 0; padding: 0;
+        overflow: hidden;
+        background:
+          radial-gradient(1200px 800px at 20% 12%, rgba(255,154,194,0.14), rgba(255,154,194,0) 60%),
+          radial-gradient(900px 700px at 78% 18%, rgba(120,210,184,0.18), rgba(120,210,184,0) 58%),
+          radial-gradient(900px 700px at 55% 82%, rgba(255,225,109,0.16), rgba(255,225,109,0) 58%),
+          linear-gradient(180deg, var(--bg0), var(--bg1));
+        color: var(--ink);
+        font-family: ui-rounded, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, Segoe UI, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body::before {
+        content: "";
+        position: fixed; inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(2px 2px at 20% 30%, rgba(43,31,25,0.06) 40%, rgba(0,0,0,0) 44%) 0 0 / 10px 10px,
+          radial-gradient(1px 1px at 66% 72%, rgba(43,31,25,0.05) 40%, rgba(0,0,0,0) 44%) 0 0 / 12px 12px;
+        mix-blend-mode: multiply;
+        opacity: 0.7;
+      }
+
+      #stage { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+
+      #ui {
+        position: fixed; inset: 0;
+        display: flex; flex-direction: column;
+        padding: calc(var(--safeT) + 14px) calc(var(--safeR) + 14px) calc(var(--safeB) + 14px) calc(var(--safeL) + 14px);
+        gap: 12px;
+        pointer-events: none;
+      }
+
+      .topbar {
+        pointer-events: auto;
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      }
+
+      .brand { display: flex; flex-direction: column; line-height: 1.05; user-select: none; }
+      .brand .title { font-weight: 900; font-size: 22px; letter-spacing: 0.4px; text-shadow: 0 2px 0 rgba(255,255,255,0.8), 0 7px 18px rgba(43,31,25,0.14); }
+      .brand .subtitle { font-weight: 700; font-size: 12px; letter-spacing: 0.8px; opacity: 0.75; }
+
+      .chips { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+      .chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 10px; border-radius: 999px;
+        background: rgba(255,248,236,0.78); border: 2px solid rgba(43,31,25,0.14);
+        box-shadow: 0 10px 20px rgba(43,31,25,0.09); backdrop-filter: blur(8px);
+        font-weight: 800; font-size: 12px; user-select: none;
+      }
+      .chip .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--accentA); box-shadow: 0 0 0 2px rgba(43,31,25,0.12) inset; }
+      .chip.secondary { background: rgba(246,231,205,0.76); }
+      .chip.secondary .dot { background: var(--accentB); }
+
+      .btnIcon {
+        pointer-events: auto; appearance: none;
+        border: 2px solid rgba(43,31,25,0.16); background: rgba(255,248,236,0.82);
+        color: var(--ink); border-radius: 16px; padding: 10px 12px;
+        font-weight: 900; font-size: 13px;
+        display: inline-flex; align-items: center; gap: 10px;
+        box-shadow: 0 14px 24px rgba(43,31,25,0.12); backdrop-filter: blur(10px);
+        cursor: pointer; touch-action: manipulation;
+      }
+      .btnIcon:active { transform: translateY(1px) scale(0.99); box-shadow: 0 10px 18px rgba(43,31,25,0.14); }
+      .btnIcon .k {
+        width: 26px; height: 26px; border-radius: 12px;
+        display: grid; place-items: center;
+        background: linear-gradient(180deg, rgba(120,210,184,0.9), rgba(120,210,184,0.55));
+        border: 2px solid rgba(43,31,25,0.14); box-shadow: 0 10px 16px rgba(43,31,25,0.12);
+        font-size: 14px;
+      }
+
+      .views { pointer-events: none; flex: 1; display: grid; place-items: center; }
+
+      .panel {
+        pointer-events: auto;
+        width: min(520px, calc(100vw - 28px));
+        border-radius: calc(var(--radius) + 6px);
+        background: rgba(255,248,236,0.78);
+        border: 2px solid rgba(43,31,25,0.16);
+        box-shadow: 0 26px 50px rgba(43,31,25,0.16);
+        backdrop-filter: blur(12px);
+        padding: 18px;
+      }
+      .panelInner {
+        background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(246,231,205,0.64));
+        border: 2px solid rgba(43,31,25,0.12); border-radius: var(--radius);
+        padding: 14px; box-shadow: inset 0 2px 0 rgba(255,255,255,0.7);
+      }
+
+      .hero { display: grid; gap: 12px; }
+      .hero h1 { margin: 0; font-size: 28px; font-weight: 1000; letter-spacing: 0.4px; }
+      .hero p { margin: 0; font-size: 13px; font-weight: 700; opacity: 0.82; line-height: 1.35; }
+      .ctaRow { display: grid; gap: 10px; margin-top: 6px; }
+
+      .btnPrimary {
+        appearance: none; border: 0; border-radius: 22px; padding: 14px 16px; width: 100%;
+        font-weight: 1000; font-size: 16px; letter-spacing: 0.4px; cursor: pointer;
+        color: #1b140f;
+        background: linear-gradient(180deg, rgba(255,225,109,1), rgba(255,154,194,0.96));
+        box-shadow: 0 18px 28px rgba(43,31,25,0.16);
+        border: 2px solid rgba(43,31,25,0.2);
+        touch-action: manipulation;
+      }
+      .btnPrimary:active { transform: translateY(1px) scale(0.99); box-shadow: 0 14px 22px rgba(43,31,25,0.18); }
+
+      .btnGhost {
+        appearance: none; border-radius: 22px; padding: 12px 16px; width: 100%;
+        font-weight: 900; font-size: 14px; letter-spacing: 0.2px; cursor: pointer;
+        color: var(--ink); border: 2px solid rgba(43,31,25,0.18);
+        background: rgba(255,255,255,0.58);
+        box-shadow: 0 16px 26px rgba(43,31,25,0.1);
+        touch-action: manipulation;
+      }
+      .btnGhost:active { transform: translateY(1px) scale(0.99); }
+
+      .playBox { display: grid; gap: 12px; }
+      .timer { display: grid; justify-items: center; gap: 8px; padding: 12px; }
+      .timer .num { font-variant-numeric: tabular-nums; font-weight: 1000; font-size: 44px; letter-spacing: 1px; text-shadow: 0 2px 0 rgba(255,255,255,0.8), 0 12px 28px rgba(43,31,25,0.12); }
+      .timer .hint { font-size: 12px; font-weight: 800; opacity: 0.8; text-align: center; line-height: 1.35; }
+      .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+      .badge {
+        display: inline-flex; align-items: center; gap: 8px; border-radius: 999px;
+        padding: 8px 12px; border: 2px solid rgba(43,31,25,0.16);
+        background: rgba(255,255,255,0.7); font-weight: 1000; font-size: 12px;
+        box-shadow: 0 14px 24px rgba(43,31,25,0.1);
+      }
+      .badge .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--accentC); box-shadow: 0 0 0 2px rgba(43,31,25,0.12) inset; }
+
+      .resultCard { display: grid; gap: 10px; }
+      .resultTitle { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+      .resultTitle h2 { margin: 0; font-size: 18px; font-weight: 1000; letter-spacing: 0.2px; }
+      .meta { display: grid; gap: 6px; font-size: 12px; font-weight: 800; opacity: 0.86; line-height: 1.3; }
+      .tagRow { display: flex; flex-wrap: wrap; gap: 8px; }
+      .tag { padding: 6px 10px; border-radius: 999px; border: 2px dashed rgba(43,31,25,0.2); background: rgba(246,231,205,0.56); font-size: 12px; font-weight: 900; }
+
+      .albumBox { display: grid; gap: 10px; }
+      .albumStats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat {
+        border-radius: 16px; border: 2px solid rgba(43,31,25,0.14);
+        background: rgba(255,255,255,0.58); padding: 10px 12px;
+        box-shadow: 0 16px 24px rgba(43,31,25,0.1);
+      }
+      .stat .k { font-size: 11px; font-weight: 900; opacity: 0.72; }
+      .stat .v { margin-top: 6px; font-size: 16px; font-weight: 1000; letter-spacing: 0.2px; }
+      .albumGrid { max-height: min(44vh, 420px); overflow: auto; -webkit-overflow-scrolling: touch; padding: 2px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+      .card {
+        border-radius: 18px; border: 2px solid rgba(43,31,25,0.14);
+        background: rgba(255,255,255,0.62); padding: 10px 10px 12px;
+        box-shadow: 0 18px 26px rgba(43,31,25,0.1);
+        display: grid; gap: 6px; cursor: pointer; touch-action: manipulation; user-select: none;
+      }
+      .card:active { transform: translateY(1px); }
+      .cardTop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .cardName { font-weight: 1000; font-size: 13px; line-height: 1.1; }
+      .cardSub { font-weight: 900; font-size: 11px; opacity: 0.75; }
+      .tiny { font-weight: 1000; font-size: 11px; opacity: 0.82; }
+
+      .toast {
+        position: fixed; left: 50%; bottom: calc(var(--safeB) + 14px);
+        transform: translateX(-50%); pointer-events: none;
+        opacity: 0; transition: opacity 180ms ease, transform 180ms ease;
+        padding: 10px 12px; border-radius: 999px;
+        border: 2px solid rgba(43,31,25,0.14);
+        background: rgba(255,248,236,0.86);
+        box-shadow: 0 18px 30px rgba(43,31,25,0.14);
+        font-weight: 1000; font-size: 12px; backdrop-filter: blur(10px);
+      }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+      .modalMask {
+        position: fixed; inset: 0;
+        background: rgba(30,20,16,0.36); backdrop-filter: blur(10px);
+        display: none; align-items: center; justify-content: center;
+        padding: calc(var(--safeT) + 16px) calc(var(--safeR) + 16px) calc(var(--safeB) + 16px) calc(var(--safeL) + 16px);
+      }
+      .modalMask.show { display: flex; }
+      .modal {
+        width: min(520px, calc(100vw - 32px));
+        border-radius: 22px; border: 2px solid rgba(255,255,255,0.22);
+        background: rgba(255,248,236,0.92);
+        box-shadow: 0 34px 70px rgba(0,0,0,0.26);
+        padding: 14px;
+      }
+      .modal h3 { margin: 6px 4px 8px; font-size: 15px; font-weight: 1000; }
+      .modal p { margin: 0 4px 10px; font-size: 12px; font-weight: 800; opacity: 0.86; line-height: 1.4; white-space: pre-line; }
+      .modalActions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+      .danger { background: linear-gradient(180deg, rgba(255,107,107,1), rgba(255,154,194,0.92)); }
+
+      .errorOverlay { position: fixed; inset: 0; display: none; place-items: center; padding: 24px; background: rgba(30,20,16,0.4); backdrop-filter: blur(12px); }
+      .errorOverlay.show { display: grid; }
+      .errorBox {
+        width: min(520px, calc(100vw - 32px));
+        border-radius: 22px; border: 2px solid rgba(255,255,255,0.22);
+        background: rgba(255,248,236,0.92);
+        box-shadow: 0 34px 70px rgba(0,0,0,0.26);
+        padding: 14px 14px 16px; display: grid; gap: 10px;
+      }
+      .errorBox .msg { font-size: 14px; font-weight: 1000; line-height: 1.35; }
+      .errorBox .sub { font-size: 12px; font-weight: 800; opacity: 0.82; line-height: 1.4; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+
+    <div id="ui">
+      <div class="topbar">
+        <div class="brand">
+          <div class="title">屎记</div>
+          <div class="subtitle">THE POO · 纯离线丑萌图鉴</div>
+        </div>
+        <div class="chips">
+          <div class="chip" id="chipWeather"><span class="dot"></span><span id="weatherText">今日：—</span></div>
+          <div class="chip secondary" id="chipStreak"><span class="dot"></span><span id="streakText">连击：0</span></div>
+          <button class="btnIcon" id="btnAlbum" type="button"><span class="k">册</span><span>图鉴</span></button>
+          <button class="btnIcon" id="btnInfo" type="button"><span class="k">？</span><span>说明</span></button>
+        </div>
+      </div>
+
+      <div class="views">
+        <div class="panel" id="panel">
+          <div class="panelInner" id="viewHome">
+            <div class="hero">
+              <h1>今天要拉出什么传说？</h1>
+              <p>
+                点击开始计时，想结束就结束。<br />
+                生成时间 + 经历时间 + 便便掉落，并自动收进你的图鉴。
+              </p>
+              <div class="ctaRow">
+                <button class="btnPrimary" id="btnGoPlay" type="button">开拉！进入计时</button>
+                <button class="btnGhost" id="btnQuickDrop" type="button">我就试试（3 秒速成）</button>
+              </div>
+              <div class="meta" id="homeHint"></div>
+            </div>
+          </div>
+
+          <div class="panelInner" id="viewPlay" style="display:none">
+            <div class="playBox">
+              <div class="timer">
+                <div class="num" id="timerText">00:00.000</div>
+                <div class="hint" id="timerHint">点击「开始」开计时，点击「结束」开掉落</div>
+              </div>
+              <div class="row2">
+                <button class="btnPrimary" id="btnStart" type="button">开始</button>
+                <button class="btnPrimary danger" id="btnEnd" type="button" disabled>结束</button>
+              </div>
+              <button class="btnGhost" id="btnBackHome" type="button">回到开始页</button>
+            </div>
+          </div>
+
+          <div class="panelInner" id="viewResult" style="display:none">
+            <div class="resultCard">
+              <div class="resultTitle">
+                <div>
+                  <h2 id="resultName">—</h2>
+                  <div class="tiny" id="resultRarity">—</div>
+                </div>
+                <span class="badge" id="resultBadge"><span class="dot"></span><span id="resultBadgeText">—</span></span>
+              </div>
+              <div class="meta">
+                <div id="resultTime">生成时间：—</div>
+                <div id="resultElapsed">经历时间：—</div>
+              </div>
+              <div class="tagRow" id="resultTags"></div>
+              <div class="ctaRow">
+                <button class="btnPrimary" id="btnSaveToAlbum" type="button">收进图鉴</button>
+                <button class="btnGhost" id="btnPlayAgain" type="button">再拉一把</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panelInner" id="viewAlbum" style="display:none">
+            <div class="albumBox">
+              <div class="albumStats">
+                <div class="stat"><div class="k">总掉落</div><div class="v" id="statTotal">0</div></div>
+                <div class="stat"><div class="k">稀有以上</div><div class="v" id="statRare">0</div></div>
+                <div class="stat"><div class="k">连击天数</div><div class="v" id="statStreak">0</div></div>
+                <div class="stat"><div class="k">今日伪天气</div><div class="v" id="statWeather">—</div></div>
+              </div>
+              <div class="albumGrid" id="albumGrid"></div>
+              <div class="row2">
+                <button class="btnGhost" id="btnAlbumBack" type="button">返回</button>
+                <button class="btnGhost" id="btnClearData" type="button">清空数据</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modalMask" id="modalMask" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" id="modal">
+        <h3 id="modalTitle">—</h3>
+        <p id="modalBody">—</p>
+        <div class="modalActions">
+          <button class="btnGhost" id="modalCancel" type="button">取消</button>
+          <button class="btnPrimary" id="modalOk" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="errorOverlay" id="errorOverlay">
+      <div class="errorBox">
+        <div class="msg">哎呀，出错了，请重启试试吧~</div>
+        <div class="sub" id="errorSub"></div>
+        <button class="btnPrimary" id="btnReload" type="button">我重启一下</button>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const ERROR_TEXT = "哎呀，出错了，请重启试试吧~";
+        const LS_KEYS = {
+          album: "thepoo_album_v1",
+          stats: "thepoo_stats_v1",
+          settings: "thepoo_settings_v1",
+          today: "thepoo_today_v1",
+        };
+
+        const $ = (id) => {
+          const el = document.getElementById(id);
+          if (!el) throw new Error("Missing element: " + id);
+          return el;
+        };
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const pad2 = (n) => (n < 10 ? "0" + n : "" + n);
+        const pad3 = (n) => (n < 10 ? "00" + n : n < 100 ? "0" + n : "" + n);
+        const formatElapsed = (ms) => {
+          const t = Math.max(0, Math.floor(ms));
+          const m = Math.floor(t / 60000);
+          const s = Math.floor((t % 60000) / 1000);
+          const r = t % 1000;
+          return `${pad2(m)}:${pad2(s)}.${pad3(r)}`;
+        };
+        const ymd = (d) => {
+          const y = d.getFullYear();
+          const m = pad2(d.getMonth() + 1);
+          const da = pad2(d.getDate());
+          return `${y}-${m}-${da}`;
+        };
+        const isYesterday = (a, b) => {
+          const da = new Date(a + "T00:00:00");
+          const db = new Date(b + "T00:00:00");
+          return Math.round((db - da) / 86400000) === 1;
+        };
+        const fnv1a = (str) => {
+          let h = 2166136261;
+          for (let i = 0; i < str.length; i++) {
+            h ^= str.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+          }
+          return h >>> 0;
+        };
+        const makeRng = (seed) => {
+          let s = seed >>> 0;
+          return () => {
+            s ^= s << 13;
+            s ^= s >>> 17;
+            s ^= s << 5;
+            return ((s >>> 0) / 4294967296) % 1;
+          };
+        };
+        const pickWeighted = (rng, items) => {
+          let total = 0;
+          for (const it of items) total += it.w;
+          if (total <= 0) return null;
+          let r = rng() * total;
+          for (const it of items) {
+            r -= it.w;
+            if (r <= 0) return it.item;
+          }
+          return items[items.length - 1].item;
+        };
+        const now = () => new Date();
+        const getTodaySeed = () => ymd(now());
+
+        const RARITY = {
+          common:     { zh: "普通",    order: 1, color: "#7a5a4b" },
+          rare:       { zh: "稀有",    order: 2, color: "#2d8f74" },
+          epic:       { zh: "史诗",    order: 3, color: "#d45c9b" },
+          legendary:  { zh: "传说",    order: 4, color: "#d6a300" },
+          mystery:    { zh: "神秘",    order: 5, color: "#3d3af2" },
+          hidden:     { zh: "隐藏",    order: 4.5, color: "#4b2bd6" },
+        };
+
+        const POOP_CATALOG = [
+          { id:"c-001", name:"干巴小山",       rarity:"common",    tags:["干巴型","咔嚓感"],                baseWeight:10, vibe:{hue:28, accentHue:340} },
+          { id:"c-002", name:"泡泡团子",       rarity:"common",    tags:["泡泡型","噗噜噗噜"],              baseWeight:9,  vibe:{hue:22, accentHue:160} },
+          { id:"r-101", name:"滋润卷卷",       rarity:"rare",      tags:["滋润型","果冻感"],                baseWeight:4,  vibe:{hue:24, accentHue:54},  flags:["moist"] },
+          { id:"r-102", name:"彩糖撒撒",       rarity:"rare",      tags:["彩糖型","闪光"],                  baseWeight:4,  vibe:{hue:18, accentHue:320} },
+          { id:"e-201", name:"双层夹心王",     rarity:"epic",      tags:["双层夹心型","软糯"],              baseWeight:1.8,vibe:{hue:26, accentHue:140} },
+          { id:"l-301", name:"毛绒传说球",     rarity:"legendary", tags:["毛绒型","不可思议"],              baseWeight:0.75,vibe:{hue:20, accentHue:46}, flags:["hiddenGate"] },
+          { id:"h-401", name:"打卡缝合怪",     rarity:"hidden",    tags:["隐藏","连击奖励"],                baseWeight:0.55,vibe:{hue:30, accentHue:190},flags:["streakGate"] },
+          { id:"m-001", name:"午夜神秘便便",   rarity:"mystery",   tags:["每日限定","神秘"],                baseWeight:1,  vibe:{hue:18, accentHue:250}, flags:["midnightOnly"] },
+        ];
+
+        const WEATHER_POOL = [
+          { id:"sunny", zh:"晴",   dot:"#ffb35a", moistBoost:0.95 },
+          { id:"rainy", zh:"雨",   dot:"#58b8ff", moistBoost:1.55 },
+          { id:"humid", zh:"潮湿", dot:"#5fd6b0", moistBoost:1.75 },
+        ];
+
+        const getTodayWeather = () => {
+          const key = getTodaySeed();
+          const cached = localStorage.getItem(LS_KEYS.today);
+          if (cached) {
+            try { const v = JSON.parse(cached); if (v.key===key && v.weatherId) { const w = WEATHER_POOL.find(x=>x.id===v.weatherId); if (w) return w; } } catch {}
+          }
+          const rng = makeRng(fnv1a("weather@" + key));
+          const r = rng();
+          const weather = r < 0.56 ? WEATHER_POOL[0] : r < 0.82 ? WEATHER_POOL[1] : WEATHER_POOL[2];
+          localStorage.setItem(LS_KEYS.today, JSON.stringify({key, weatherId: weather.id}));
+          return weather;
+        };
+
+        const isMidnightWindow = (d) => { const h=d.getHours(); const m=d.getMinutes(); return h===0 && m>=0 && m<=10; };
+
+        const loadJson = (key, fallback) => { const raw=localStorage.getItem(key); if (!raw) return fallback; try { return JSON.parse(raw); } catch { return fallback; } };
+        const saveJson = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+
+        const defaultStats = () => ({ totalDrops:0, rareDrops:0, streakDays:0, lastCheckinDate:"", lastDropId:"" });
+        const defaultAlbum = () => ({ version:"v1", items:{}, records:[] });
+
+        const bumpStreak = (stats, todayKey) => {
+          if (!stats.lastCheckinDate) { stats.streakDays=1; stats.lastCheckinDate=todayKey; return stats; }
+          if (stats.lastCheckinDate===todayKey) return stats;
+          if (isYesterday(stats.lastCheckinDate, todayKey)) { stats.streakDays=(stats.streakDays||0)+1; stats.lastCheckinDate=todayKey; return stats; }
+          stats.streakDays=1; stats.lastCheckinDate=todayKey; return stats;
+        };
+
+        const computeWeights = ({ elapsedMs, weather, streakDays, isMidnight }) => {
+          const sec = Math.max(0, elapsedMs/1000);
+          const t = clamp(Math.log2(1+sec)/6, 0, 1);
+          const streakBoost = clamp((streakDays||0)/10, 0, 1);
+          return POOP_CATALOG.map(p => {
+            let w = p.baseWeight;
+            const r = RARITY[p.rarity]?.order ?? 1;
+            const rarityMul = 1 + clamp(t*1.25,0,1)*(r-1)*0.9;
+            w *= rarityMul;
+            if (p.flags?.includes("moist")) w *= weather.moistBoost;
+            if (p.flags?.includes("streakGate")) w *= streakBoost>0 ? 0.2+streakBoost*1.8 : 0;
+            if (p.flags?.includes("hiddenGate")) w *= sec>=18 ? 1 : 0;
+            if (p.flags?.includes("midnightOnly")) w *= isMidnight && sec>=6 ? 15 : 0;
+            if (p.rarity==="legendary") w *= 0.7+streakBoost*1.1;
+            if (p.rarity==="epic") w *= 0.85+streakBoost*0.9;
+            if (sec<2) w *= 0.65;
+            if (sec>30) w *= 1.12;
+            return { item:p, w:Math.max(0,w) };
+          });
+        };
+
+        const rollPoop = ({ elapsedMs, endAt, stats, weather }) => {
+          const todayKey = ymd(endAt);
+          const seed = fnv1a(`drop@${todayKey}@${stats.streakDays}@${Math.floor(elapsedMs)}`);
+          const rng = makeRng(seed);
+          const isMidnight = isMidnightWindow(endAt);
+          const weights = computeWeights({ elapsedMs, weather, streakDays:stats.streakDays, isMidnight });
+          const chosen = pickWeighted(rng, weights) || POOP_CATALOG[0];
+          const createdAtISO = endAt.toISOString();
+          const rarity = chosen.rarity;
+          const sizeBase = 0.58 + clamp(Math.log10(1+elapsedMs/1000)*0.28, 0, 0.62);
+          const wobble = rng()*2-1;
+          const sparkle = rarity==="epic"||rarity==="legendary"||rarity==="mystery"||rarity==="hidden";
+          return {
+            dropId:`${todayKey}-${Math.floor(Date.now())}-${Math.floor(rng()*1e6)}`,
+            poopId:chosen.id, name:chosen.name, tags:chosen.tags.slice(0),
+            rarity, rarityZh:RARITY[rarity]?.zh??"普通", rarityColor:RARITY[rarity]?.color??"#7a5a4b",
+            vibe:chosen.vibe, createdAtISO, elapsedMs:Math.floor(elapsedMs), sizeBase, wobble, sparkle, isMidnight,
+          };
+        };
+
+        const canvas = $("stage");
+        const ctx = canvas.getContext("2d", {alpha:true});
+        if (!ctx) throw new Error("Canvas 2D not supported");
+
+        const ui = {
+          weatherText:$("weatherText"), streakText:$("streakText"), chipWeather:$("chipWeather"), chipStreak:$("chipStreak"),
+          btnAlbum:$("btnAlbum"), btnInfo:$("btnInfo"),
+          viewHome:$("viewHome"), viewPlay:$("viewPlay"), viewResult:$("viewResult"), viewAlbum:$("viewAlbum"),
+          btnGoPlay:$("btnGoPlay"), btnQuickDrop:$("btnQuickDrop"),
+          btnStart:$("btnStart"), btnEnd:$("btnEnd"), btnBackHome:$("btnBackHome"),
+          timerText:$("timerText"), timerHint:$("timerHint"), homeHint:$("homeHint"),
+          resultName:$("resultName"), resultRarity:$("resultRarity"),
+          resultTime:$("resultTime"), resultElapsed:$("resultElapsed"),
+          resultTags:$("resultTags"), resultBadge:$("resultBadge"), resultBadgeText:$("resultBadgeText"),
+          btnSaveToAlbum:$("btnSaveToAlbum"), btnPlayAgain:$("btnPlayAgain"),
+          statTotal:$("statTotal"), statRare:$("statRare"), statStreak:$("statStreak"), statWeather:$("statWeather"),
+          albumGrid:$("albumGrid"), btnAlbumBack:$("btnAlbumBack"), btnClearData:$("btnClearData"),
+          toast:$("toast"),
+          modalMask:$("modalMask"), modalTitle:$("modalTitle"), modalBody:$("modalBody"),
+          modalCancel:$("modalCancel"), modalOk:$("modalOk"),
+          errorOverlay:$("errorOverlay"), errorSub:$("errorSub"), btnReload:$("btnReload"),
+        };
+
+        const app = { view:"home", running:false, dropping:false, startAtPerf:0, startAtWall:null, elapsedMs:0, lastTick:0, weather:null, stats:null, album:null, pendingDrop:null, dropActor:null, particles:[], bgT:0, paused:false };
+
+        const showToast = (text) => {
+          ui.toast.textContent=text; ui.toast.classList.add("show");
+          window.clearTimeout(showToast._t);
+          showToast._t=window.setTimeout(()=>ui.toast.classList.remove("show"), 1300);
+        };
+
+        const showView = (v) => {
+          app.view=v;
+          ui.viewHome.style.display=v==="home"?"block":"none";
+          ui.viewPlay.style.display=v==="play"?"block":"none";
+          ui.viewResult.style.display=v==="result"?"block":"none";
+          ui.viewAlbum.style.display=v==="album"?"block":"none";
+        };
+
+        const openModal = ({title, body, okText, cancelText, danger, onOk}) => {
+          ui.modalTitle.textContent=title; ui.modalBody.textContent=body;
+          ui.modalOk.textContent=okText||"确定"; ui.modalCancel.textContent=cancelText||"取消";
+          ui.modalOk.classList.toggle("danger", !!danger);
+          ui.modalMask.classList.add("show"); ui.modalMask.setAttribute("aria-hidden","false");
+          const cleanup = () => { ui.modalMask.classList.remove("show"); ui.modalMask.setAttribute("aria-hidden","true"); ui.modalOk.onclick=null; ui.modalCancel.onclick=null; ui.modalMask.onclick=null; };
+          ui.modalCancel.onclick = ()=>cleanup();
+          ui.modalMask.onclick = (e)=>{ if (e.target===ui.modalMask) cleanup(); };
+          ui.modalOk.onclick = ()=>{ cleanup(); if (onOk) onOk(); };
+        };
+
+        const updateTopChips = () => {
+          const w=app.weather;
+          ui.weatherText.textContent=`今日：${w.zh}`;
+          ui.chipWeather.querySelector(".dot").style.background=w.dot;
+          ui.streakText.textContent=`连击：${app.stats.streakDays||0}`;
+        };
+
+        const updateHomeHint = () => {
+          const d=now();
+          const inWindow=isMidnightWindow(d);
+          const midText=inWindow?"现在在【午夜限定】窗口！结束计时更可能出神秘便便。":"午夜 00:00-00:10 有每日限定神秘便便。";
+          const wetText=app.weather.id==="sunny"?"今日偏干，滋润型概率略低。":"今日偏湿，滋润型更容易出现。";
+          const s=app.stats.streakDays||0;
+          const streakText=s>=2?`你已连击 ${s} 天：隐藏便便概率提高。`:"连续打卡可提高隐藏便便概率。";
+          ui.homeHint.innerHTML=`<div>${midText}</div><div>${wetText}</div><div>${streakText}</div>`;
+        };
+
+        const updateAlbumView = () => {
+          ui.statTotal.textContent=app.stats.totalDrops||0;
+          ui.statRare.textContent=app.stats.rareDrops||0;
+          ui.statStreak.textContent=app.stats.streakDays||0;
+          ui.statWeather.textContent=app.weather.zh;
+          ui.albumGrid.innerHTML="";
+          const entries=Object.values(app.album.items||{});
+          entries.sort((a,b)=>{ const ra=RARITY[a.rarityBest]?.order??1; const rb=RARITY[b.rarityBest]?.order??1; if (rb!==ra) return rb-ra; return (b.count||0)-(a.count||0); });
+          if (!entries.length) {
+            const e=document.createElement("div"); e.style.gridColumn="1 / -1"; e.style.padding="10px 6px"; e.style.fontWeight="1000"; e.style.opacity="0.8";
+            e.textContent="还没收集到便便，快去拉一坨！"; ui.albumGrid.appendChild(e); return;
+          }
+          for (const it of entries) {
+            const card=document.createElement("div"); card.className="card";
+            const r=RARITY[it.rarityBest]||RARITY.common;
+            card.style.borderColor=r.color+"55";
+            card.style.boxShadow=`0 18px 26px rgba(43,31,25,0.1), 0 0 0 1px ${r.color}22 inset`;
+            const top=document.createElement("div"); top.className="cardTop";
+            const name=document.createElement("div"); name.className="cardName"; name.textContent=it.name;
+            const badge=document.createElement("div"); badge.className="badge"; badge.style.borderColor=r.color+"44";
+            badge.innerHTML=`<span class="dot" style="background:${r.color}"></span><span>${r.zh}</span>`;
+            top.appendChild(name); top.appendChild(badge);
+            const sub=document.createElement("div"); sub.className="cardSub"; sub.textContent=`收集次数：${it.count}`;
+            const tiny=document.createElement("div"); tiny.className="tiny";
+            const first=it.firstSeenISO?new Date(it.firstSeenISO):null;
+            tiny.textContent=first?`首次获得：${pad2(first.getMonth()+1)}-${pad2(first.getDate())} ${pad2(first.getHours())}:${pad2(first.getMinutes())}`:"";
+            card.appendChild(top); card.appendChild(sub); card.appendChild(tiny);
+            card.onclick=()=>{ openModal({ title:it.name, body:`稀有度：${r.zh}\n收集次数：${it.count}\n首次获得：${it.firstSeenISO?new Date(it.firstSeenISO).toLocaleString():"—"}\n最近获得：${it.lastSeenISO?new Date(it.lastSeenISO).toLocaleString():"—"}`, okText:"好耶", cancelText:"关闭", }); };
+            ui.albumGrid.appendChild(card);
+          }
+        };
+
+        const updateResultView = (drop) => {
+          ui.resultName.textContent=drop.name;
+          const r=RARITY[drop.rarity]||RARITY.common;
+          ui.resultRarity.textContent=`稀有度：${r.zh}`;
+          ui.resultTime.textContent=`生成时间：${new Date(drop.createdAtISO).toLocaleString()}`;
+          ui.resultElapsed.textContent=`经历时间：${formatElapsed(drop.elapsedMs)}`;
+          ui.resultBadgeText.textContent=r.zh;
+          ui.resultBadge.querySelector(".dot").style.background=r.color;
+          ui.resultBadge.style.borderColor=r.color+"44";
+          ui.resultTags.innerHTML="";
+          const tags=drop.tags.slice(0);
+          if (drop.isMidnight) tags.unshift("午夜窗口");
+          for (const t of tags.slice(0,8)) { const el=document.createElement("div"); el.className="tag"; el.textContent=t; ui.resultTags.appendChild(el); }
+        };
+
+        const saveDropToAlbum = (drop) => {
+          const album=app.album; const stats=app.stats; const nowISO=drop.createdAtISO;
+          const exists=album.items[drop.poopId];
+          if (!exists) { album.items[drop.poopId]={ poopId:drop.poopId, name:drop.name, count:1, firstSeenISO:nowISO, lastSeenISO:nowISO, rarityBest:drop.rarity }; }
+          else { exists.count=(exists.count||0)+1; exists.lastSeenISO=nowISO; if ((RARITY[drop.rarity]?.order??1)>(RARITY[exists.rarityBest]?.order??1)) exists.rarityBest=drop.rarity; }
+          album.records.unshift({ id:drop.dropId, createdAtISO:drop.createdAtISO, elapsedMs:drop.elapsedMs, poopId:drop.poopId, rarity:drop.rarity, tags:drop.tags });
+          album.records=album.records.slice(0,60);
+          stats.totalDrops=(stats.totalDrops||0)+1;
+          if ((RARITY[drop.rarity]?.order??1)>=RARITY.rare.order) stats.rareDrops=(stats.rareDrops||0)+1;
+          stats.lastDropId=drop.dropId;
+          saveJson(LS_KEYS.album, album); saveJson(LS_KEYS.stats, stats);
+        };
+
+        const resizeCanvas = () => {
+          const dpr=Math.max(1, Math.min(3, window.devicePixelRatio||1));
+          const w=Math.floor(window.innerWidth); const h=Math.floor(window.innerHeight);
+          canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
+          canvas.style.width=w+"px"; canvas.style.height=h+"px";
+          ctx.setTransform(dpr,0,0,dpr,0,0);
+        };
+
+        const hsl = (h,s,l,a=1)=>`hsla(${h},${s}%,${l}%,${a})`;
+
+        const drawSoftPoop = (ctx2, x, y, size, vibe, squishX, squishY, rot, sparkle, t) => {
+          ctx2.save();
+          ctx2.translate(x,y); ctx2.rotate(rot); ctx2.scale(squishX,squishY);
+          const hue=vibe.hue??24; const accentHue=vibe.accentHue??320;
+          const dark=hsl(hue,42,26); const mid=hsl(hue,52,38); const light=hsl(hue,62,52);
+          const outline="rgba(43,31,25,0.65)";
+          const grad=ctx2.createRadialGradient(-size*0.12,-size*0.18,size*0.1,0,0,size*1.25);
+          grad.addColorStop(0,light); grad.addColorStop(0.45,mid); grad.addColorStop(1,dark);
+          const wig=Math.sin(t*2.3)*0.02+Math.sin(t*1.3+1.2)*0.015;
+          const w0=size*0.82; const h0=size*0.94;
+          ctx2.lineWidth=Math.max(2,size*0.055); ctx2.lineJoin="round"; ctx2.lineCap="round";
+          ctx2.beginPath();
+          ctx2.moveTo(-w0*0.9,h0*0.38);
+          ctx2.bezierCurveTo(-w0,h0*0.04,-w0*0.74,-h0*0.22,-w0*0.34,-h0*0.22);
+          ctx2.bezierCurveTo(-w0*0.26,-h0*0.42,-w0*0.04,-h0*0.58,w0*0.2,-h0*0.52);
+          ctx2.bezierCurveTo(w0*0.5,-h0*0.6,w0*0.88,-h0*0.26,w0*0.82,h0*0.08);
+          ctx2.bezierCurveTo(w0*0.92,h0*0.3,w0*0.58,h0*0.56,w0*0.18,h0*0.52);
+          ctx2.bezierCurveTo(-w0*0.12,h0*0.62,-w0*0.62,h0*0.66,-w0*0.9,h0*0.38);
+          ctx2.closePath();
+          ctx2.fillStyle=grad; ctx2.fill(); ctx2.strokeStyle=outline; ctx2.stroke();
+          const spr=sparkle?1:0.65;
+          const dot=(dx,dy,rr,a)=>{ ctx2.beginPath(); ctx2.arc(dx,dy,rr,0,Math.PI*2); ctx2.fillStyle=hsl(accentHue,70,60,a); ctx2.fill(); };
+          dot(-size*0.18,-size*0.06,size*0.07,0.35*spr);
+          dot(size*0.16,size*0.02,size*0.06,0.28*spr);
+          dot(size*0.03,-size*0.22,size*0.05,0.22*spr);
+          ctx2.globalAlpha=0.9; ctx2.fillStyle="rgba(255,255,255,0.55)";
+          ctx2.beginPath(); ctx2.ellipse(-size*0.16,-size*0.12,size*0.22,size*0.12,wig,0,Math.PI*2); ctx2.fill();
+          ctx2.globalAlpha=1;
+          ctx2.restore();
+        };
+
+        const spawnImpactParticles = (x, y, baseHue, accentHue, power, rng) => {
+          const count=Math.floor(10+power*10);
+          for (let i=0;i<count;i++) {
+            const ang=(rng()*Math.PI)/1.2+Math.PI*1.1;
+            const sp=60+rng()*(140+power*160);
+            app.particles.push({ x,y, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp, r:2+rng()*3, life:0.9+rng()*0.7, hue:rng()<0.6?accentHue:baseHue, a:0.6+rng()*0.4 });
+          }
+        };
+
+        const createDropActor = (drop) => {
+          const rng=makeRng(fnv1a("actor@"+drop.dropId));
+          const w=window.innerWidth;
+          const x=w*(0.45+rng()*0.1);
+          return { x, y:-80, vx:(rng()*2-1)*28, vy:0, rot:(rng()*2-1)*0.2, rotV:(rng()*2-1)*0.6, size:Math.min(w,window.innerHeight)*(0.16+drop.sizeBase*0.12), squish:0, settled:false, bounces:0, rng };
+        };
+
+        const physicsStep = (dt) => {
+          const a=app.dropActor; if (!a) return;
+          const g=1600; const groundY=window.innerHeight*0.82;
+          a.vy+=g*dt; a.x+=a.vx*dt; a.y+=a.vy*dt; a.rot+=a.rotV*dt;
+          const sidePad=18;
+          if (a.x<sidePad) { a.x=sidePad; a.vx=Math.abs(a.vx)*0.9; a.rotV*=-0.65; }
+          if (a.x>window.innerWidth-sidePad) { a.x=window.innerWidth-sidePad; a.vx=-Math.abs(a.vx)*0.9; a.rotV*=-0.65; }
+          const hit=a.y+a.size*0.62>=groundY;
+          if (hit) {
+            a.y=groundY-a.size*0.62;
+            const impact=Math.abs(a.vy);
+            a.vy=-a.vy*0.38; a.vx*=0.72; a.rotV*=0.55;
+            a.squish=Math.min(1,a.squish+clamp(impact/1400,0.15,0.65));
+            a.bounces+=1;
+            if (a.bounces<=3) { const d=app.pendingDrop; spawnImpactParticles(a.x,groundY-6,d.vibe.hue,d.vibe.accentHue,clamp(impact/900,0,1),a.rng); }
+            if (impact<180) { a.vy=0; a.rotV*=0.2; }
+            if (Math.abs(a.vy)<40&&Math.abs(a.vx)<18) a.settled=true;
+          }
+          a.squish=Math.max(0,a.squish-dt*1.6);
+        };
+
+        const drawScene = (t) => {
+          const w=window.innerWidth; const h=window.innerHeight;
+          ctx.clearRect(0,0,w,h);
+          const bgT=app.bgT;
+          const k1=0.5+Math.sin(bgT*0.6)*0.5;
+          const k2=0.5+Math.sin(bgT*0.42+2.1)*0.5;
+          const k3=0.5+Math.sin(bgT*0.33+4.2)*0.5;
+          const blob=(cx,cy,r,hue,a)=>{ const g=ctx.createRadialGradient(cx,cy,1,cx,cy,r); g.addColorStop(0,hsl(hue,86,72,a)); g.addColorStop(1,hsl(hue,86,72,0)); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); };
+          blob(w*(0.18+k1*0.06), h*(0.18+k2*0.05), Math.min(w,h)*0.32, 340, 0.12);
+          blob(w*(0.82-k2*0.07), h*(0.22+k3*0.06), Math.min(w,h)*0.29, 160, 0.12);
+          blob(w*(0.56+k3*0.05), h*(0.82-k1*0.06), Math.min(w,h)*0.28, 54, 0.11);
+          const groundY=h*0.82;
+          const groundGrad=ctx.createLinearGradient(0,groundY-80,0,h);
+          groundGrad.addColorStop(0,"rgba(246,231,205,0)");
+          groundGrad.addColorStop(0.25,"rgba(246,231,205,0.66)");
+          groundGrad.addColorStop(1,"rgba(243,234,214,0.92)");
+          ctx.fillStyle=groundGrad; ctx.fillRect(0,groundY-80,w,h-(groundY-80));
+          ctx.fillStyle="rgba(43,31,25,0.1)";
+          ctx.beginPath(); ctx.ellipse(w*0.5,groundY+24,w*0.38,34,0,0,Math.PI*2); ctx.fill();
+          const a=app.dropActor;
+          if (a&&app.pendingDrop) { const d=app.pendingDrop; drawSoftPoop(ctx,a.x,a.y,a.size,d.vibe,1+a.squish*0.16,1-a.squish*0.22,a.rot+d.wobble*0.07,d.sparkle,t); }
+          if (app.particles.length) { for (const p of app.particles) { ctx.globalAlpha=p.a*clamp(p.life,0,1); ctx.fillStyle=hsl(p.hue,78,62,1); ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); } ctx.globalAlpha=1; }
+        };
+
+        const updateParticles = (dt) => {
+          if (!app.particles.length) return;
+          const g=1800;
+          for (const p of app.particles) { p.vy+=g*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vx*=Math.pow(0.12,dt); p.life-=dt*1.3; }
+          app.particles=app.particles.filter(p=>p.life>0&&p.y<window.innerHeight+120);
+        };
+
+        const tick = (ts) => {
+          if (app.paused) { app.lastTick=ts; requestAnimationFrame(tick); return; }
+          const t=ts/1000; const dt=clamp((ts-(app.lastTick||ts))/1000,0,0.033);
+          app.lastTick=ts; app.bgT+=dt;
+          if (app.running) { app.elapsedMs=performance.now()-app.startAtPerf; ui.timerText.textContent=formatElapsed(app.elapsedMs); }
+          if (app.dropping) {
+            physicsStep(dt); updateParticles(dt);
+            if (app.dropActor&&app.dropActor.settled) { app.dropping=false; window.setTimeout(()=>{ if (app.pendingDrop) { updateResultView(app.pendingDrop); showView("result"); } }, 240); }
+          } else { updateParticles(dt); }
+          drawScene(t);
+          requestAnimationFrame(tick);
+        };
+
+        const hardResetPlay = () => {
+          app.running=false; app.dropping=false; app.startAtPerf=0; app.startAtWall=null; app.elapsedMs=0;
+          ui.timerText.textContent="00:00.000"; ui.btnEnd.disabled=true; ui.btnStart.disabled=false;
+          ui.timerHint.textContent="点击「开始」开计时，点击「结束」开掉落";
+          app.pendingDrop=null; app.dropActor=null; app.particles=[];
+        };
+
+        const startTimer = () => {
+          if (app.running||app.dropping) return;
+          app.running=true; app.startAtPerf=performance.now(); app.startAtWall=now();
+          ui.btnStart.disabled=true; ui.btnEnd.disabled=false;
+          ui.timerHint.textContent="现在开始憋…想结束就结束";
+          showToast("开始计时！");
+        };
+
+        const endTimerAndRoll = () => {
+          if (!app.running||app.dropping) return;
+          app.running=false; ui.btnEnd.disabled=true; ui.btnStart.disabled=false;
+          const endAt=now(); const elapsedMs=performance.now()-app.startAtPerf; app.elapsedMs=elapsedMs;
+          const todayKey=ymd(endAt);
+          bumpStreak(app.stats,todayKey); saveJson(LS_KEYS.stats,app.stats);
+          updateTopChips(); updateHomeHint();
+          const drop=rollPoop({ elapsedMs, endAt, stats:app.stats, weather:app.weather });
+          app.pendingDrop=drop; app.dropActor=createDropActor(drop); app.dropping=true;
+          ui.timerHint.textContent="掉落中…（落地后出结果）"; ui.timerText.textContent=formatElapsed(elapsedMs);
+          if (navigator.vibrate) { try { navigator.vibrate(14); } catch {} }
+        };
+
+        const goPlay = () => { hardResetPlay(); showView("play"); };
+        const goHome = () => { hardResetPlay(); showView("home"); };
+        const goAlbum = () => { showView("album"); updateAlbumView(); };
+
+        const bindUi = () => {
+          ui.btnGoPlay.onclick=()=>goPlay();
+          ui.btnQuickDrop.onclick=()=>{ goPlay(); window.setTimeout(()=>startTimer(),0); window.setTimeout(()=>endTimerAndRoll(),3000); };
+          ui.btnStart.onclick=()=>startTimer();
+          ui.btnEnd.onclick=()=>endTimerAndRoll();
+          ui.btnBackHome.onclick=()=>goHome();
+          ui.btnPlayAgain.onclick=()=>goPlay();
+          ui.btnAlbum.onclick=()=>goAlbum();
+          ui.btnAlbumBack.onclick=()=>{ if (app.pendingDrop) showView("result"); else showView("home"); };
+          ui.btnSaveToAlbum.onclick=()=>{ if (!app.pendingDrop) return; saveDropToAlbum(app.pendingDrop); showToast("已入库！"); if (navigator.vibrate) { try { navigator.vibrate([18,28,18]); } catch {} } updateTopChips(); ui.btnSaveToAlbum.disabled=true; window.setTimeout(()=>ui.btnSaveToAlbum.disabled=false,700); };
+          ui.btnInfo.onclick=()=>{ openModal({ title:"说明（纯离线）", body:"玩法：开始计时→结束记时→生成便便→收集进图鉴。\n\n伪天气：用本地日期种子生成"今日天气"，不联网。\n每日限定：00:00-00:10 更容易触发神秘便便。\n连击奖励：每天首次结束计时算打卡，连续天数越高隐藏概率越高。\n\n合规：卡通化拟物，不含违法违规内容。", okText:"懂了", cancelText:"关闭" }); };
+          ui.btnClearData.onclick=()=>{ openModal({ title:"清空数据？", body:"这会清空图鉴、统计、连击与设置（仅本机 localStorage）。", okText:"清空", cancelText:"算了", danger:true, onOk:()=>{ localStorage.removeItem(LS_KEYS.album); localStorage.removeItem(LS_KEYS.stats); localStorage.removeItem(LS_KEYS.settings); localStorage.removeItem(LS_KEYS.today); app.stats=defaultStats(); app.album=defaultAlbum(); app.weather=getTodayWeather(); updateTopChips(); updateHomeHint(); updateAlbumView(); showToast("已清空"); } }); };
+          window.addEventListener("resize", ()=>resizeCanvas(), {passive:true});
+          document.addEventListener("visibilitychange", ()=>{ app.paused=document.hidden; }, {passive:true});
+        };
+
+        const showError = (err) => { ui.errorOverlay.classList.add("show"); ui.errorSub.textContent=err&&err.message?err.message:ERROR_TEXT; };
+
+        const init = () => {
+          app.stats=loadJson(LS_KEYS.stats, defaultStats());
+          app.album=loadJson(LS_KEYS.album, defaultAlbum());
+          app.weather=getTodayWeather();
+          updateTopChips(); updateHomeHint();
+          resizeCanvas(); bindUi();
+          showView("home");
+          requestAnimationFrame(tick);
+        };
+
+        window.addEventListener("error", (e)=>showError(e.error||new Error(String(e.message||ERROR_TEXT))));
+        window.addEventListener("unhandledrejection", (e)=>showError(e.reason||new Error(ERROR_TEXT)));
+        ui.btnReload.onclick=()=>{ try { location.reload(); } catch { showError(new Error(ERROR_TEXT)); } };
+
+        try { init(); } catch (e) { showError(e instanceof Error ? e : new Error(String(e||ERROR_TEXT))); }
+      })();
+    </script>
+  </body>
+</html>
