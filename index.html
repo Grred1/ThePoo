@@ -722,6 +722,17 @@ body {
   object-fit: contain;
   image-rendering: pixelated;
 }
+.drop-poop {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 120px;
+  opacity: 0;
+  z-index: 3;
+  filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.18));
+}
 .poop-img {
   width: 100%;
   height: 100%;
@@ -1479,6 +1490,688 @@ body {
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<<<<<<< Updated upstream
 <script type="module" src="./src/app.js"></script>
+=======
+<script type="module">
+import { POOP_DATABASE, findPoop, getRarityConfig, TOTAL_POOP_COUNT } from './src/poopDatabase.js';
+
+try {
+const STORAGE_KEYS = {
+  records: 'shiji_records',
+  collection: 'shiji_collection',
+  streakDays: 'shiji_streak',
+  lastDate: 'shiji_last_date',
+  luckyPoints: 'shiji_points',
+  weather: 'shiji_weather',
+};
+
+const DB = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+const S = {
+  status: 'idle',
+  start: null,
+  elapsed: 0,
+  interval: null,
+  teaseKey: null,
+  fifteenShown: false,
+  pendingDrop: null,
+  atlasFilter: 'all',
+};
+
+const ENCOURAGES = [
+  '坚持记录，你的肠道会越来越顺畅哦！💪',
+  '规律如厕是健康生活的第一步 🌿',
+  '今天有没有好好补充水分呀？💧',
+  '多吃蔬菜，便便会更顺畅哦～🥦',
+  '你是今天最认真的如厕达人！🏆',
+];
+
+const WEATHER_LIST = [
+  { code: 'sunny', label: '晴天', emoji: '☀️' },
+  { code: 'cloudy', label: '多云', emoji: '⛅️' },
+  { code: 'overcast', label: '阴天', emoji: '☁️' },
+  { code: 'windy', label: '大风', emoji: '🌬️' },
+  { code: 'rainy', label: '雨天', emoji: '🌧️' },
+  { code: 'stormy', label: '雷雨', emoji: '⛈️' },
+];
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+function ymd(d) { return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function hm(d) { return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+function todayYMD() { return ymd(new Date()); }
+function yesterdayYMD() { const d = new Date(); d.setDate(d.getDate() - 1); return ymd(d); }
+
+function fmtMMSS(sec) {
+  return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
+}
+
+function fmtDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}分${String(s).padStart(2,'0')}秒`;
+}
+
+function randomPick(items) { return items[Math.floor(Math.random() * items.length)]; }
+
+function getRecords() { return DB.get(STORAGE_KEYS.records, []); }
+function setRecords(v) { DB.set(STORAGE_KEYS.records, v); }
+function getCollection() { return DB.get(STORAGE_KEYS.collection, []); }
+function setCollection(v) { DB.set(STORAGE_KEYS.collection, v); }
+function getStreakDays() { return Number(DB.get(STORAGE_KEYS.streakDays, 0)) || 0; }
+function setStreakDays(v) { DB.set(STORAGE_KEYS.streakDays, Math.max(0, Math.floor(v))); }
+function getLastDate() { return DB.get(STORAGE_KEYS.lastDate, null); }
+function setLastDate(v) { DB.set(STORAGE_KEYS.lastDate, v); }
+function getLuckyPoints() { return Number(DB.get(STORAGE_KEYS.luckyPoints, 0)) || 0; }
+function setLuckyPoints(v) { DB.set(STORAGE_KEYS.luckyPoints, Math.max(0, Math.floor(v))); }
+
+function getWeatherCode() {
+  const cur = DB.get(STORAGE_KEYS.weather, null);
+  if (typeof cur === 'string' && WEATHER_LIST.some(w => w.code === cur)) return cur;
+  const init = WEATHER_LIST[Math.floor(Math.random() * WEATHER_LIST.length)].code;
+  DB.set(STORAGE_KEYS.weather, init);
+  return init;
+}
+
+function setWeatherCode(code) {
+  if (!WEATHER_LIST.some(w => w.code === code)) return;
+  DB.set(STORAGE_KEYS.weather, code);
+}
+
+function getTier(streakDays) {
+  if (streakDays <= 2) return { cap: 100, pityRarity: 'rare', label: '新手池' };
+  if (streakDays <= 6) return { cap: 200, pityRarity: 'epic', label: '进阶池' };
+  return { cap: 300, pityRarity: 'legendary', label: '传说池' };
+}
+
+function isNightBonus(now) {
+  const h = now.getHours();
+  return h >= 23 || h < 2;
+}
+
+function isRainyWeather(code) {
+  return code === 'rainy' || code === 'stormy';
+}
+
+function teaseByElapsed(sec) {
+  if (sec < 60) return { key: 't0', html: '还在热身呢？' };
+  if (sec < 180) return { key: 't1', html: '进入状态了，好样的' };
+  if (sec < 480) return { key: 't2', html: '标准健康如厕，继续保持！' };
+  if (sec < 900) return { key: 't3', html: '有点久了，腿还好吗？' };
+  return { key: 't4', html: '腿麻了吧……<br>感觉得了' };
+}
+
+function playSceneDropOnce() {
+  const el = document.getElementById('scene-box-drop');
+  el.classList.remove('play');
+  void el.offsetWidth;
+  el.classList.add('play');
+  setTimeout(() => el.classList.remove('play'), 3050);
+}
+
+function updateRunningTease(sec) {
+  const t = teaseByElapsed(sec);
+  if (S.teaseKey !== t.key) {
+    S.teaseKey = t.key;
+    document.getElementById('speech-bubble').innerHTML = t.html;
+  }
+  if (!S.fifteenShown && sec >= 900) {
+    S.fifteenShown = true;
+    playSceneDropOnce();
+  }
+}
+
+function pickByRarity(rarity) {
+  const list = POOP_DATABASE.filter(p => p.rarity === rarity);
+  if (list.length === 0) return randomPick(POOP_DATABASE);
+  return randomPick(list);
+}
+
+function normalizeProb(p) {
+  const keys = Object.keys(p);
+  for (const k of keys) p[k] = Math.max(0, p[k]);
+  const sum = keys.reduce((a,k) => a + p[k], 0);
+  const out = {};
+  if (sum <= 0) return out;
+  for (const k of keys) out[k] = p[k] / sum;
+  return out;
+}
+
+function rollRarity(prob) {
+  const r = Math.random();
+  let acc = 0;
+  for (const [k, v] of Object.entries(prob)) {
+    acc += v;
+    if (r <= acc) return k;
+  }
+  return Object.keys(prob)[0] ?? 'common';
+}
+
+function pointsGainByDuration(sec) {
+  if (sec < 60) return 0;
+  if (sec < 180) return 10;
+  if (sec < 480) return 15;
+  if (sec < 900) return 5;
+  return 0;
+}
+
+function buildNote(sec, weatherCode) {
+  const a0 = ['闪电战', '顺滑无比'];
+  const a1 = ['标准发挥', '短促有力'];
+  const a2 = ['带薪摸鱼', '从容不迫'];
+  const a3 = ['深度冥想', '便秘的边缘'];
+  const a4 = ['人椅合一', '双腿的噩梦'];
+  const meals = ['昨晚的火锅', '今早的冰美式', '上午的外卖', '那杯来路不明的奶茶'];
+  const missions = ['终于完成了它的历史使命', '光荣卸任', '交代了后事'];
+  let evals = a2;
+  if (sec < 60) evals = a0;
+  else if (sec < 180) evals = a1;
+  else if (sec < 480) evals = a2;
+  else if (sec < 900) evals = a3;
+  else evals = a4;
+  const leg = Math.min(99, Math.round((sec / 60) * 6));
+  const wTag = isRainyWeather(weatherCode) ? randomPick(['滋润型', '黏糊型']) : null;
+  const wLine = wTag ? `今晚的雨让你获得了${wTag}加成。` : '';
+  return `这是一次${randomPick(evals)}的如厕。你的双腿感受到了${leg}%的麻木。${randomPick(meals)}${randomPick(missions)}。${wLine}`;
+}
+
+function calcDrop(sec) {
+  const now = new Date();
+  const weather = getWeatherCode();
+  const streakDays = getStreakDays();
+  const tier = getTier(streakDays);
+  const luckyPoints = getLuckyPoints();
+  const bonuses = [];
+
+  if (sec < 60) {
+    bonuses.push('⚡ 1分钟内强制神秘');
+    const poop = findPoop('tiny_mystery') ?? pickByRarity('mystery');
+    return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+  if (sec > 900) {
+    bonuses.push('⚡ 15分钟以上强制神秘');
+    const poop = findPoop('numb_legs') ?? pickByRarity('mystery');
+    return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+
+  if (luckyPoints >= tier.cap) {
+    bonuses.push(`🎯 积分池保底（${tier.label}）`);
+    setLuckyPoints(0);
+    const poop = pickByRarity(tier.pityRarity);
+    return { poop, pointsGain: 0, luckyAfter: 0, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+
+  const pointsGain = pointsGainByDuration(sec);
+  const luckyAfter = luckyPoints + pointsGain;
+  setLuckyPoints(luckyAfter);
+
+  const base = { common: 70, rare: 20, epic: 8, legendary: 2 };
+  if (isNightBonus(now)) {
+    base.epic += 1.5;
+    base.legendary += 0.5;
+    base.common -= 2.0;
+    bonuses.push('🌙 深夜加成 +1.5% / +0.5%');
+  }
+  if (isRainyWeather(weather)) {
+    base.rare += 1.0;
+    base.common -= 1.0;
+    bonuses.push('🌧 雨天加成 +1%');
+  }
+  const legBonus = Math.min(30, streakDays * 5);
+  if (legBonus > 0) {
+    base.legendary += legBonus;
+    base.common -= legBonus;
+    bonuses.push(`🔥 连击加成：传说+${legBonus}%`);
+  }
+
+  const prob = normalizeProb(base);
+  const rarity = rollRarity(prob);
+  const poop = pickByRarity(rarity);
+  return { poop, pointsGain, luckyAfter, streakDays, settleAt: now, bonuses, durationSec: sec };
+}
+
+function applyRarityToResultCard(rarity) {
+  const el = document.getElementById('result-card');
+  el.classList.remove('rarity-common','rarity-rare','rarity-epic','rarity-legendary','rarity-mystery');
+  el.classList.add('rarity-' + rarity);
+}
+
+function showEndOverlay() {
+  const overlay = document.getElementById('drop-overlay');
+  const box = document.getElementById('mystery-box');
+  const poopEl = document.getElementById('drop-poop');
+  const stage = document.getElementById('drop-stage');
+  const card = document.getElementById('result-card');
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  card.classList.remove('show');
+
+  box.className = 'mystery-box';
+  poopEl.className = 'drop-poop';
+
+  stage.querySelectorAll('.particle').forEach(p => p.remove());
+
+  box.classList.add('shake1');
+  setTimeout(() => {
+    box.classList.remove('shake1');
+    box.classList.add('shake2');
+  }, 500);
+
+  setTimeout(() => {
+    box.classList.remove('shake2');
+    box.classList.add('burst');
+    const count = 6 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const colors = ['#F5CC60', '#6DBF9E', '#E8758C', '#C49A6C', '#B8E4CC', '#EAD5F5'];
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+      const dist = 70 + Math.random() * 55;
+      const dx = Math.round(Math.cos(angle) * dist);
+      const dy = Math.round(Math.sin(angle) * dist);
+      p.style.setProperty('--dx', dx + 'px');
+      p.style.setProperty('--dy', dy + 'px');
+      stage.appendChild(p);
+      requestAnimationFrame(() => p.classList.add('play'));
+    }
+  }, 1500);
+
+  setTimeout(() => {
+    poopEl.classList.add('play');
+  }, 2000);
+
+  setTimeout(() => {
+    finalizeAndShowCard();
+  }, 3000);
+}
+
+function hideEndOverlay() {
+  const overlay = document.getElementById('drop-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function closeAtlasModal() {
+  const overlay = document.getElementById('atlas-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function ensureStreakOnLoad() {
+  const last = getLastDate();
+  if (!last) return;
+  const today = todayYMD();
+  if (last === today) return;
+  if (last === yesterdayYMD()) return;
+  setStreakDays(0);
+}
+
+function updateStreakOnRecord() {
+  const last = getLastDate();
+  const today = todayYMD();
+  const yd = yesterdayYMD();
+  let streak = getStreakDays();
+  if (last === today) return streak;
+  if (last === yd) streak += 1;
+  else streak = 1;
+  setStreakDays(streak);
+  setLastDate(today);
+  return streak;
+}
+
+function refreshStats() {
+  const today = todayYMD();
+  const records = getRecords();
+  const todayRecs = records.filter(r => r.date === today);
+  const count = todayRecs.length;
+  document.getElementById('today-count').textContent = count;
+
+  const yd = yesterdayYMD();
+  const yCount = records.filter(r => r.date === yd).length;
+  const diff = count - yCount;
+  const cSub = document.getElementById('count-compare');
+  if (yCount > 0) {
+    cSub.textContent = (diff >= 0 ? '比昨天 +' : '比昨天 ') + diff;
+    cSub.className = 'card-sub ' + (diff >= 0 ? 'up' : 'down');
+  } else {
+    cSub.textContent = count > 0 ? `今日第${count}次` : '今天还没开始';
+    cSub.className = 'card-sub';
+  }
+
+  if (todayRecs.length > 0) {
+    const avg = Math.round(todayRecs.reduce((a,r) => a + r.durationSec, 0) / todayRecs.length);
+    document.getElementById('avg-display').textContent = fmtMMSS(avg);
+    if (yCount > 0) {
+      const yAvg = Math.round(records.filter(r => r.date === yd).reduce((a,r) => a + r.durationSec, 0) / yCount);
+      const adiff = avg - yAvg;
+      const aEl = document.getElementById('avg-compare');
+      aEl.textContent = '比昨天 ' + (adiff >= 0 ? '+' : '') + fmtMMSS(Math.abs(adiff));
+      aEl.className = 'card-sub ' + (adiff <= 0 ? 'up' : 'down');
+    } else {
+      document.getElementById('avg-compare').textContent = '今日平均';
+    }
+  } else {
+    document.getElementById('avg-display').textContent = '--:--';
+    document.getElementById('avg-compare').textContent = '暂无记录';
+  }
+
+  document.getElementById('box-count').textContent = String(getCollection().length);
+  document.getElementById('encourage-text').textContent = ENCOURAGES[count % ENCOURAGES.length];
+  renderBanner();
+}
+
+function renderBanner() {
+  const weather = getWeatherCode();
+  const w = WEATHER_LIST.find(x => x.code === weather) ?? WEATHER_LIST[0];
+  document.getElementById('weather-emoji').textContent = w.emoji;
+  document.getElementById('weather-text').textContent = w.label;
+
+  document.getElementById('streak-days').textContent = String(getStreakDays());
+
+  const tier = getTier(getStreakDays());
+  const points = getLuckyPoints();
+  document.getElementById('points-goal').textContent = String(tier.cap);
+  document.getElementById('points-now').textContent = String(points);
+  document.getElementById('points-fill').style.width = Math.min(100, Math.max(0, (points / tier.cap) * 100)) + '%';
+}
+
+function showStreakTip() {
+  const s = getStreakDays();
+  const tier = getTier(s);
+  const label = getRarityConfig({ rarity: tier.pityRarity }).label;
+  showToast(`连续打卡 ${s} 天 · ${tier.label}（保底 ${label}）`);
+}
+
+function cycleWeather() {
+  const cur = getWeatherCode();
+  const idx = WEATHER_LIST.findIndex(w => w.code === cur);
+  const next = WEATHER_LIST[(idx + 1 + WEATHER_LIST.length) % WEATHER_LIST.length];
+  setWeatherCode(next.code);
+  renderBanner();
+  showToast('今日天气：' + next.label);
+}
+
+function findFirstCollectTS(poopId) {
+  const records = getRecords();
+  const found = records.filter(r => r.poopId === poopId).sort((a,b) => a.ts - b.ts)[0];
+  return found ? found.ts : null;
+}
+
+function openAtlasModal(poopId) {
+  const poop = findPoop(poopId);
+  if (!poop) return;
+  document.getElementById('modal-title').textContent = poop.name;
+  document.getElementById('modal-img').src = poop.image;
+  document.getElementById('modal-img').alt = poop.name;
+  document.getElementById('modal-rarity').textContent = getRarityConfig(poop).label;
+  document.getElementById('modal-desc').textContent = poop.desc ?? '—';
+  document.getElementById('modal-trigger').textContent = poop.trigger ?? '—';
+  const ts = findFirstCollectTS(poopId);
+  document.getElementById('modal-time').textContent = ts ? (ymd(new Date(ts)) + ' ' + hm(new Date(ts))) : '—';
+  const overlay = document.getElementById('atlas-overlay');
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function renderAtlas() {
+  document.getElementById('atlas-total').textContent = String(TOTAL_POOP_COUNT);
+  const collection = new Set(getCollection());
+  document.getElementById('atlas-count').textContent = String(collection.size);
+  const grid = document.getElementById('atlas-grid');
+  grid.innerHTML = '';
+  const list = S.atlasFilter === 'all' ? POOP_DATABASE : POOP_DATABASE.filter(p => p.rarity === S.atlasFilter);
+  for (const poop of list) {
+    const unlocked = collection.has(poop.id);
+    const item = document.createElement('div');
+    item.className = 'grid-item' + (unlocked ? '' : ' locked');
+    const emoji = document.createElement('div');
+    emoji.className = 'grid-emoji';
+    if (unlocked) {
+      const img = document.createElement('img');
+      img.className = 'poop-img';
+      img.alt = poop.name;
+      img.src = poop.image;
+      emoji.appendChild(img);
+    }
+    const name = document.createElement('div');
+    name.className = 'grid-name';
+    name.textContent = unlocked ? poop.name : '???';
+    const tag = document.createElement('div');
+    tag.className = 'grid-tag';
+    tag.textContent = unlocked ? ('✨ ' + getRarityConfig(poop).label) : '未解锁';
+    item.appendChild(emoji);
+    item.appendChild(name);
+    item.appendChild(tag);
+    if (unlocked) item.addEventListener('click', () => openAtlasModal(poop.id));
+    grid.appendChild(item);
+  }
+}
+
+function setAtlasFilter(filter) {
+  S.atlasFilter = filter;
+  const row = document.getElementById('atlas-filters');
+  Array.from(row.querySelectorAll('.filter-chip')).forEach(btn => btn.classList.remove('active'));
+  const mapping = ['all','common','rare','epic','legendary','mystery'];
+  const idx = mapping.indexOf(filter);
+  const btn = row.querySelectorAll('.filter-chip')[idx];
+  if (btn) btn.classList.add('active');
+  renderAtlas();
+}
+
+function renderRecords() {
+  const records = getRecords();
+  document.getElementById('records-total').textContent = String(records.length);
+  const list = document.getElementById('records-list');
+  list.innerHTML = '';
+  if (records.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'record-note';
+    empty.textContent = '还没有如厕记录，先从一次开始吧～';
+    list.appendChild(empty);
+    return;
+  }
+  records.forEach((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'record';
+    const t = document.createElement('div');
+    t.className = 'record-title';
+    t.innerHTML = `<div class="idx">📋 如厕档案 #${records.length - i}</div><div class="ts">${r.date} ${r.time}</div>`;
+    const l1 = document.createElement('div');
+    l1.className = 'record-line';
+    l1.innerHTML = `⏱ 历时：<span class="v">${fmtDuration(r.durationSec)}</span>`;
+    const l2 = document.createElement('div');
+    l2.className = 'record-line';
+    l2.innerHTML = `💩 获得：<span class="v">${r.poopName}</span>（${r.rarityLabel}）`;
+    const note = document.createElement('div');
+    note.className = 'record-note';
+    note.textContent = r.note;
+    el.appendChild(t);
+    el.appendChild(l1);
+    el.appendChild(l2);
+    el.appendChild(note);
+    list.appendChild(el);
+  });
+}
+
+function saveDropRecord(drop) {
+  const poop = drop.poop;
+  const rarityLabel = getRarityConfig(poop).label;
+  const date = todayYMD();
+  const time = hm(drop.settleAt);
+  const note = buildNote(drop.durationSec, getWeatherCode());
+  const record = {
+    ts: drop.settleAt.getTime(),
+    date,
+    time,
+    durationSec: drop.durationSec,
+    poopId: poop.id,
+    poopName: poop.name,
+    rarity: poop.rarity,
+    rarityLabel,
+    bonuses: drop.bonuses,
+    pointsGain: drop.pointsGain,
+    luckyAfter: drop.luckyAfter,
+    note,
+  };
+  const records = getRecords();
+  records.unshift(record);
+  setRecords(records.slice(0, 200));
+
+  const collection = getCollection();
+  if (!collection.includes(poop.id)) {
+    collection.unshift(poop.id);
+    setCollection(collection);
+  }
+}
+
+function finalizeAndShowCard() {
+  const item = S.pendingDrop;
+  if (!item) return;
+  updateStreakOnRecord();
+  saveDropRecord(item);
+
+  applyRarityToResultCard(item.poop.rarity);
+  document.getElementById('result-poop-img').src = item.poop.image;
+  document.getElementById('result-poop-img').alt = item.poop.name;
+  document.getElementById('result-name').textContent = item.poop.name;
+  document.getElementById('result-rarity').textContent = '✨ ' + getRarityConfig(item.poop).label;
+  document.getElementById('result-duration').textContent = fmtDuration(item.durationSec);
+  document.getElementById('result-time').textContent = hm(item.settleAt);
+  document.getElementById('result-bonus').textContent = item.bonuses.length > 0 ? item.bonuses.join(' · ') : '无';
+
+  document.getElementById('result-card').classList.add('show');
+  refreshStats();
+  renderAtlas();
+  renderRecords();
+}
+
+function handleStart() {
+  if (S.status === 'running') return;
+  S.status = 'running';
+  S.start = Date.now();
+  S.elapsed = 0;
+  S.teaseKey = null;
+  S.fifteenShown = false;
+  S.pendingDrop = null;
+  document.getElementById('timer-display').textContent = '00:00';
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-end').disabled = false;
+  document.getElementById('scene').classList.add('running');
+  document.getElementById('speech-bubble').innerHTML = '还在热身呢？';
+  hideEndOverlay();
+  S.interval = setInterval(() => {
+    S.elapsed = Math.floor((Date.now() - S.start) / 1000);
+    document.getElementById('timer-display').textContent = fmtMMSS(S.elapsed);
+    updateRunningTease(S.elapsed);
+  }, 500);
+}
+
+function handleEnd() {
+  if (S.status !== 'running') return;
+  clearInterval(S.interval);
+  S.status = 'done';
+  S.elapsed = Math.floor((Date.now() - S.start) / 1000);
+  document.getElementById('timer-display').textContent = fmtMMSS(S.elapsed);
+  document.getElementById('btn-end').disabled = true;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('scene').classList.remove('running');
+  document.getElementById('speech-bubble').innerHTML = '结束结算中…';
+
+  const drop = calcDrop(S.elapsed);
+  S.pendingDrop = drop;
+  document.getElementById('drop-poop-img').src = drop.poop.image;
+  document.getElementById('drop-poop-img').alt = drop.poop.name;
+  showEndOverlay();
+}
+
+function handleAgain() {
+  hideEndOverlay();
+  document.getElementById('speech-bubble').innerHTML = '点击开始<br>计时吧！';
+  S.status = 'idle';
+  S.pendingDrop = null;
+}
+
+function handleViewNote() {
+  const item = S.pendingDrop;
+  if (!item) { showToast('还没有掉落结果'); return; }
+  showToast(buildNote(item.durationSec, getWeatherCode()));
+}
+
+function handleAddToAtlas() {
+  const item = S.pendingDrop;
+  if (!item) { showToast('还没有掉落结果'); return; }
+  const collection = getCollection();
+  const btn = document.getElementById('btn-add-atlas');
+  const origin = btn ? btn.textContent : '';
+  if (!collection.includes(item.poop.id)) {
+    collection.unshift(item.poop.id);
+    setCollection(collection);
+    showToast('已收入图鉴：' + item.poop.name);
+    if (btn) btn.textContent = '已收入 ✅';
+  } else {
+    showToast('已在图鉴中：' + item.poop.name);
+    if (btn) btn.textContent = '已在图鉴 ✅';
+  }
+  if (btn) {
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; btn.textContent = origin || '收入图鉴 📖'; }, 1400);
+  }
+  renderAtlas();
+}
+
+function switchTab(n) {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('tab-'+i).classList.toggle('active', i === n);
+  }
+  const views = ['view-home', 'view-atlas', 'view-records', 'view-me'];
+  views.forEach((id, idx) => document.getElementById(id).classList.toggle('active', idx === n));
+  if (n === 1) renderAtlas();
+  if (n === 2) renderRecords();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  const ms = msg && msg.length > 26 ? 5200 : 2800;
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+ensureStreakOnLoad();
+document.getElementById('atlas-total').textContent = String(TOTAL_POOP_COUNT);
+renderBanner();
+refreshStats();
+renderAtlas();
+renderRecords();
+
+window.handleStart = handleStart;
+window.handleEnd = handleEnd;
+window.handleAgain = handleAgain;
+window.handleViewNote = handleViewNote;
+window.handleAddToAtlas = handleAddToAtlas;
+window.switchTab = switchTab;
+window.showToast = showToast;
+window.cycleWeather = cycleWeather;
+window.showStreakTip = showStreakTip;
+window.setAtlasFilter = setAtlasFilter;
+window.closeAtlasModal = closeAtlasModal;
+
+} catch(e) {
+  document.body.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;
+      min-height:100vh;padding:24px;text-align:center;
+      font-size:1.1rem;color:#c00;flex-direction:column;gap:12px;">
+      <div style="font-size:3rem">💩</div>
+      哎呀，出错了，请刷新试试吧~<br>
+      <small style="color:#999;font-size:.8rem">${e.message}</small>
+    </div>`;
+}
+</script>
+>>>>>>> Stashed changes
 </body>
 </html>
