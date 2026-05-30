@@ -20,7 +20,7 @@ export function createDrop({
   };
 
   const teaseByElapsed = (sec) => {
-    if (sec < 5) return { key: 't0', html: '还在热身呢？' };
+    if (sec < 3) return { key: 't0', html: '还在热身呢？' };
     if (sec < 180) return { key: 't1', html: '进入状态了，好样的' };
     if (sec < 480) return { key: 't2', html: '标准健康如厕，继续保持！' };
     if (sec < 900) return { key: 't3', html: '有点久了，腿还好吗？' };
@@ -50,7 +50,7 @@ export function createDrop({
   };
 
   const pointsGainByDuration = (sec) => {
-    if (sec < 5) return 0;
+    if (sec < 3) return 0;
     if (sec < 180) return 10;
     if (sec < 480) return 15;
     if (sec < 900) return 5;
@@ -71,8 +71,8 @@ export function createDrop({
     const luckyPoints = banner.getLuckyPoints();
     const bonuses = [];
 
-    if (sec < 5) {
-      bonuses.push('⚡ 5秒内强制神秘');
+    if (sec < 3) {
+      bonuses.push('⚡ 3秒内强制神秘');
       const poop = data.findPoop('tiny_mystery') ?? pickByRarity('mystery');
       return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
     }
@@ -98,14 +98,14 @@ export function createDrop({
       base.epic += 1.5;
       base.legendary += 0.5;
       base.common -= 2.0;
-      bonuses.push('🌙 深夜加成 +1.5% / +0.5%');
+      bonuses.push('🌙 深夜加成：史诗+1.5% /传说+0.5%');
     }
     if (config.isRainyWeather(weather)) {
       base.rare += 1.0;
       base.common -= 1.0;
-      bonuses.push('🌧 雨天加成 +1%');
+      bonuses.push('🌧 雨天加成：稀有+1%');
     }
-    const legBonus = Math.min(30, streakDays * 5);
+    const legBonus = Math.min(5, streakDays * 1);
     if (legBonus > 0) {
       base.legendary += legBonus;
       base.common -= legBonus;
@@ -285,13 +285,69 @@ export function createDrop({
     showEndOverlay();
   };
 
-  const handleAgain = () => {
+  const hideAftermath = () => {
+    const overlay = document.getElementById('aftermath-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+  };
+
+  const showAftermath = () => {
+    const overlay = document.getElementById('aftermath-overlay');
+    if (!overlay) return;
+    document.querySelectorAll('.aftermath-opt').forEach((b) => b.classList.remove('active'));
+    document.getElementById('location-custom').value = '';
+    document.getElementById('mood-custom').value = '';
+    const locationSub = document.getElementById('location-sub');
+    if (locationSub) {
+      const questions = [
+        '这次我在哪里开的"股东大会"？',
+        '这次我在哪里放的"大招"？',
+        '这次我在哪里"清理缓存"？',
+        '这次我在哪里"奋战"？',
+      ];
+      locationSub.textContent = questions[Math.floor(Math.random() * questions.length)];
+    }
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+  };
+
+  const resetAfterDrop = () => {
     hideEndOverlay();
+    hideAftermath();
     const bubble = document.getElementById('speech-bubble');
     if (bubble) bubble.innerHTML = '点击开始<br>计时吧！';
     S.status = 'idle';
     S.pendingDrop = null;
   };
+
+  const handleAgain = () => {
+    hideEndOverlay();
+    showAftermath();
+  };
+
+  const handleAftermathConfirm = () => {
+    const activeLoc = document.querySelector('#location-options .aftermath-opt.active');
+    const customLoc = document.getElementById('location-custom').value.trim();
+    const location = customLoc || (activeLoc ? activeLoc.dataset.value : '神秘地点');
+
+    const activeMood = document.querySelector('#mood-options .aftermath-opt.active');
+    const customMood = document.getElementById('mood-custom').value.trim();
+    const mood = customMood || (activeMood ? activeMood.dataset.value : '不知道，我的心情很曼妙');
+
+    records.updateLastRecord(location, mood);
+    resetAfterDrop();
+  };
+
+  document.addEventListener('click', (e) => {
+    const opt = e.target.closest('.aftermath-opt');
+    if (!opt) return;
+    const parent = opt.parentElement;
+    if (parent && (parent.id === 'location-options' || parent.id === 'mood-options')) {
+      parent.querySelectorAll('.aftermath-opt').forEach((b) => b.classList.remove('active'));
+      opt.classList.add('active');
+    }
+  });
 
   const handleViewNote = () => {
     const item = S.pendingDrop;
@@ -328,6 +384,8 @@ export function createDrop({
       }, 1400);
     }
   };
+
+  window.handleAftermathConfirm = handleAftermathConfirm;
 
   return {
     handleStart,

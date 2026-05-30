@@ -1233,8 +1233,6 @@ body {
   </div>
 
   <!-- SUBTITLE -->
-  <div class="subtitle">我们的便便时长 ✨</div>
-
   <div class="view active" id="view-home">
   <div class="banner" id="banner">
     <button class="banner-chip secondary" id="streak-chip" type="button" onclick="showStreakTip()">
@@ -1381,9 +1379,15 @@ body {
   </div>
 
   <div class="view" id="view-records">
+    <div class="panel calendar-panel">
+      <div class="panel-title">
+        <div>📅 日历</div>
+      </div>
+      <div id="calendar-wrap"></div>
+    </div>
     <div class="panel">
       <div class="panel-title">
-        <div>如厕日记</div>
+        <div><span id="records-date-title">📋 全部记录</span></div>
         <div class="meta">共 <span id="records-total">0</span> 条</div>
       </div>
       <div class="list" id="records-list"></div>
@@ -1394,10 +1398,9 @@ body {
     <div class="panel">
       <div class="panel-title">
         <div>我的</div>
-        <div class="meta">建设中</div>
       </div>
-      <div class="record-note">这里后续可以放：成就、设置、数据导出等。</div>
       <button class="draw-btn" id="btn-draw-poop" type="button">我的大便不服！！！</button>
+      <button class="draw-btn summary-btn" id="btn-summary" type="button">📊 总结</button>
     </div>
   </div>
 
@@ -1509,6 +1512,57 @@ body {
         <span class="draw-hint large">大便很满意！</span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- Aftermath Overlay -->
+<div class="overlay" id="aftermath-overlay" aria-hidden="true">
+  <div class="overlay-panel aftermath-panel">
+    <div class="panel">
+      <div class="aftermath-title">如厕小结</div>
+    </div>
+    <div class="panel">
+      <div class="aftermath-label">💩 大便地点</div>
+      <div class="aftermath-sub" id="location-sub">这次我在哪里开的"股东大会"？</div>
+      <div class="aftermath-options" id="location-options">
+        <button class="aftermath-opt" data-value="家" type="button">🏠 家</button>
+        <button class="aftermath-opt" data-value="学校" type="button">🏫 学校</button>
+        <button class="aftermath-opt" data-value="公司" type="button">💼 公司</button>
+        <button class="aftermath-opt" data-value="商场" type="button">🛍 商场</button>
+      </div>
+      <div class="aftermath-custom">
+        <input class="aftermath-input" id="location-custom" placeholder="自定义地点..." maxlength="20">
+      </div>
+    </div>
+    <div class="panel">
+      <div class="aftermath-label">💭 大便心情</div>
+      <div class="aftermath-sub">本次拉屎心情如何？</div>
+      <div class="aftermath-options" id="mood-options">
+        <button class="aftermath-opt" data-value="焦急憋屎" type="button">😰 焦急憋屎</button>
+        <button class="aftermath-opt" data-value="狂喜释放" type="button">🤩 狂喜释放</button>
+        <button class="aftermath-opt" data-value="烦躁便秘" type="button">😤 烦躁便秘</button>
+        <button class="aftermath-opt" data-value="打断崩溃" type="button">😫 打断崩溃</button>
+        <button class="aftermath-opt" data-value="贤者模式" type="button">🧘‍♂ 贤者模式</button>
+        <button class="aftermath-opt" data-value="绝望喷射" type="button">💀 绝望喷射</button>
+      </div>
+      <div class="aftermath-custom">
+        <input class="aftermath-input" id="mood-custom" placeholder="自定义心情..." maxlength="20">
+      </div>
+    </div>
+    <div class="panel aftermath-btn-panel">
+      <button class="aftermath-btn" id="aftermath-confirm" type="button" onclick="handleAftermathConfirm()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- Poster Overlay -->
+<div class="overlay" id="poster-overlay" aria-hidden="true">
+  <div class="overlay-panel poster-panel">
+    <div class="poster-header">
+      <button class="modal-close" id="poster-close" type="button" onclick="window.handlePosterClose()">✕</button>
+    </div>
+    <div class="poster-scroll" id="poster-container"></div>
+    <button class="poster-save-btn" id="poster-save" type="button" onclick="window.handlePosterSave()">💾 保存到本地</button>
   </div>
 </div>
 
