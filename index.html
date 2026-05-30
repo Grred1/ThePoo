@@ -98,6 +98,9 @@ body {
   letter-spacing: 0.5px;
 }
 
+.view { display: none; }
+.view.active { display: block; }
+
 /* ===== BANNER ===== */
 .banner {
   margin: 0 14px 10px;
@@ -577,10 +580,13 @@ body {
   color: #fff; border-radius: 24px;
   padding: 10px 24px; font-size: 0.9rem; font-weight: 800;
   box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
-  z-index: 999; opacity: 0;
+  z-index: 2000; opacity: 0;
   transition: all 0.3s;
   pointer-events: none;
-  white-space: nowrap;
+  width: min(360px, calc(100vw - 48px));
+  text-align: center;
+  line-height: 1.35;
+  white-space: normal;
 }
 .toast.show {
   opacity: 1; transform: translateX(-50%) translateY(0);
@@ -700,10 +706,17 @@ body {
   left: 50%;
   top: 12%;
   transform: translateX(-50%);
-  font-size: 72px;
+  width: 120px;
+  height: 120px;
   opacity: 0;
   z-index: 3;
   filter: drop-shadow(2px 6px 8px rgba(0,0,0,0.18));
+}
+.poop-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 .drop-poop.play { opacity: 1; animation: poop-fall 1s cubic-bezier(.2,.8,.2,1) forwards; }
 .result-card {
@@ -714,8 +727,78 @@ body {
   box-shadow: 4px 4px 0 var(--brown-light);
   padding: 12px 12px 10px;
   display: none;
+  position: relative;
+  overflow: hidden;
 }
 .result-card.show { display: block; }
+.result-hd {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--brown);
+  letter-spacing: 1.2px;
+  margin-bottom: 10px;
+}
+.result-body {
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  padding: 10px 10px;
+}
+.result-poop-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.result-poop-emoji {
+  width: 56px;
+  height: 56px;
+  background: var(--yellow-bg);
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  flex-shrink: 0;
+}
+.result-poop-name {
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: var(--brown);
+  line-height: 1.15;
+}
+.result-rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 2.5px solid var(--brown);
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: var(--brown);
+  background: var(--card);
+  box-shadow: 2px 2px 0 var(--brown-light);
+  margin-bottom: 10px;
+}
+.result-lines {
+  display: grid;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+.result-lines .val {
+  font-weight: 900;
+  color: var(--brown);
+  font-variant-numeric: tabular-nums;
+}
+.result-lines .bonus { color: var(--brown-mid); }
+.result-lines .bonus .val { color: var(--brown-mid); }
 .result-top {
   display: flex;
   align-items: center;
@@ -799,6 +882,290 @@ body {
   box-shadow: 2px 2px 0 var(--brown-light);
 }
 
+.result-card.rarity-common { border-color: #bdbdbd; }
+.result-card.rarity-rare { border-color: #42a5f5; }
+.result-card.rarity-rare::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  background: radial-gradient(circle at 30% 20%, rgba(66,165,245,0.55) 0%, transparent 55%);
+  opacity: 0;
+  animation: rare-glint 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.result-card.rarity-epic { border-color: #ab47bc; }
+.result-card.rarity-epic::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 26px;
+  background: linear-gradient(90deg, rgba(171,71,188,0.0), rgba(171,71,188,0.55), rgba(171,71,188,0.0));
+  background-size: 220% 100%;
+  animation: epic-sweep 1.6s linear infinite;
+  pointer-events: none;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+}
+.result-card.rarity-legendary { border-color: #ffd700; }
+.result-card.rarity-legendary::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 26px;
+  background: linear-gradient(90deg, rgba(255,215,0,0.0), rgba(255,215,0,0.65), rgba(255,215,0,0.0));
+  background-size: 240% 100%;
+  animation: epic-sweep 1.15s linear infinite;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.result-card.rarity-legendary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(255,215,0,0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 35%, rgba(255,215,0,0.55) 0%, transparent 35%),
+    radial-gradient(circle at 55% 80%, rgba(255,215,0,0.5) 0%, transparent 38%);
+  opacity: 0.35;
+  animation: legendary-pulse 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.result-card.rarity-mystery {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(90deg, #FF6B6B, #F5CC60, #6DBF9E, #42a5f5, #ab47bc, #FF6B6B) border-box;
+  border: 3px solid transparent;
+  animation: mystery-flicker 0.55s linear infinite;
+}
+@keyframes rare-glint {
+  0%, 100% { opacity: 0.05; transform: translateY(0); }
+  50% { opacity: 0.55; transform: translateY(-2px); }
+}
+@keyframes epic-sweep {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 220% 0%; }
+}
+@keyframes legendary-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.02); }
+}
+@keyframes mystery-flicker {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.18); }
+}
+
+.panel {
+  margin: 0 14px 10px;
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 22px;
+  padding: 12px 12px 12px;
+  box-shadow: 4px 4px 0 var(--brown-light);
+}
+.panel-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--brown);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.panel-title .meta {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.filter-chip {
+  height: 34px;
+  padding: 0 12px;
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  font-size: 0.74rem;
+  font-weight: 900;
+  color: var(--text-mid);
+  cursor: pointer;
+}
+.filter-chip.active {
+  background: var(--mint-bg);
+  color: var(--brown);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.grid-item {
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  padding: 10px 8px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 98px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.grid-emoji {
+  width: 48px;
+  height: 48px;
+  border: 2.5px solid var(--brown);
+  border-radius: 16px;
+  background: var(--yellow-bg);
+  box-shadow: 2px 2px 0 var(--brown-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+.grid-item.locked .grid-emoji img { display: none; }
+.grid-name {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: var(--brown);
+  line-height: 1.1;
+  min-height: 1.1em;
+}
+.grid-tag {
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: var(--text-mid);
+}
+.grid-item.locked {
+  background: #f1ede3;
+  cursor: default;
+}
+.grid-item.locked .grid-emoji {
+  background: #1f1f1f;
+  border-color: #1f1f1f;
+  box-shadow: none;
+}
+.grid-item.locked .grid-emoji::before {
+  content: '???';
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.grid-item.locked .grid-name { color: #3a2b1c; opacity: 0.55; }
+.grid-item.locked .grid-tag { opacity: 0.45; }
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+.record {
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  padding: 10px 10px 10px;
+  display: grid;
+  gap: 6px;
+}
+.record-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 900;
+  color: var(--brown);
+}
+.record-title .idx { letter-spacing: 0.6px; }
+.record-title .ts {
+  font-size: 0.72rem;
+  color: var(--text-mid);
+  font-variant-numeric: tabular-nums;
+}
+.record-line {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+.record-line .v { color: var(--brown); font-weight: 900; }
+.record-note {
+  background: var(--yellow-bg);
+  border: 2px solid rgba(92,58,30,0.3);
+  border-radius: 14px;
+  padding: 8px 9px;
+  color: var(--brown-mid);
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.modal-card {
+  width: min(360px, calc(100vw - 32px));
+  background: var(--card);
+  border: 2.5px solid var(--brown);
+  border-radius: 22px;
+  box-shadow: 5px 5px 0 var(--brown-light);
+  padding: 12px 12px 12px;
+}
+.modal-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.modal-hd .t {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--brown);
+  letter-spacing: 1px;
+}
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border: 2.5px solid var(--brown);
+  border-radius: 12px;
+  box-shadow: 2px 2px 0 var(--brown-light);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  color: var(--brown);
+}
+.modal-body {
+  display: grid;
+  gap: 8px;
+}
+.modal-img {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 2px;
+  background: #fff;
+  border: 2.5px solid var(--brown);
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 var(--brown-light);
+  padding: 10px;
+}
+.modal-row {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-mid);
+  line-height: 1.35;
+}
+.modal-row .v { color: var(--brown); font-weight: 900; }
+
 @keyframes box-shake {
   0% { transform: translate(-50%, -50%) translateX(-10px) rotate(-2deg); }
   25% { transform: translate(-50%, -50%) translateX(10px) rotate(2deg); }
@@ -848,6 +1215,7 @@ body {
   <!-- SUBTITLE -->
   <div class="subtitle">我们的便便时长 ✨</div>
 
+  <div class="view active" id="view-home">
   <div class="banner" id="banner">
     <button class="banner-chip secondary" id="streak-chip" type="button" onclick="showStreakTip()">
       🔥 连续打卡 <span id="streak-days">0</span><span class="muted">天</span>
@@ -972,6 +1340,46 @@ body {
     <div class="encourage-arrow">›</div>
   </div>
 
+  </div>
+
+  <div class="view" id="view-atlas">
+    <div class="panel">
+      <div class="panel-title">
+        <div>便便图鉴</div>
+        <div class="meta">已收集 <span id="atlas-count">0</span> / <span id="atlas-total">0</span></div>
+      </div>
+      <div class="filter-row" id="atlas-filters">
+        <button class="filter-chip active" type="button" onclick="setAtlasFilter('all')">全部</button>
+        <button class="filter-chip" type="button" onclick="setAtlasFilter('common')">普通</button>
+        <button class="filter-chip" type="button" onclick="setAtlasFilter('rare')">稀有</button>
+        <button class="filter-chip" type="button" onclick="setAtlasFilter('epic')">史诗</button>
+        <button class="filter-chip" type="button" onclick="setAtlasFilter('legendary')">传说</button>
+        <button class="filter-chip" type="button" onclick="setAtlasFilter('mystery')">神秘</button>
+      </div>
+      <div class="grid" id="atlas-grid"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-records">
+    <div class="panel">
+      <div class="panel-title">
+        <div>如厕日记</div>
+        <div class="meta">共 <span id="records-total">0</span> 条</div>
+      </div>
+      <div class="list" id="records-list"></div>
+    </div>
+  </div>
+
+  <div class="view" id="view-me">
+    <div class="panel">
+      <div class="panel-title">
+        <div>我的</div>
+        <div class="meta">建设中</div>
+      </div>
+      <div class="record-note">这里后续可以放：成就、设置、数据导出等。</div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
     <div class="nav-tab active" id="tab-0" onclick="switchTab(0)">
@@ -1005,24 +1413,44 @@ body {
   <div class="overlay-panel">
     <div class="stage" id="drop-stage">
       <div class="mystery-box" id="mystery-box" aria-label="mystery box">🎁</div>
-      <div class="drop-poop" id="drop-poop" aria-label="drop result">💩</div>
+      <div class="drop-poop" id="drop-poop" aria-label="drop result"><img class="poop-img" id="drop-poop-img" alt="drop result"></div>
     </div>
     <div class="result-card" id="result-card" role="dialog" aria-label="掉落结果">
-      <div class="result-top">
-        <div class="result-title">盲盒掉落结果</div>
-        <div class="result-meta">时长 <span id="result-duration">--:--</span> · +<span id="result-points">0</span> 积分</div>
-      </div>
-      <div class="result-main">
-        <div class="result-emoji" id="result-emoji">💩</div>
-        <div class="result-texts">
-          <div class="result-name" id="result-name">今日便便</div>
-          <div class="result-desc" id="result-desc">恭喜你，掉落了一份闪亮的快乐。</div>
+      <div class="result-hd">【获得新便便！】</div>
+      <div class="result-body">
+        <div class="result-poop-row">
+          <div class="result-poop-emoji" id="result-emoji"><img class="poop-img" id="result-poop-img" alt="poop result"></div>
+          <div class="result-poop-name" id="result-name">便便名称</div>
+        </div>
+        <div class="result-rarity" id="result-rarity">✨ 普通</div>
+        <div class="result-lines">
+          <div>本次如厕：<span class="val" id="result-duration">--:--</span></div>
+          <div>结算时间：<span class="val" id="result-time">--:--</span></div>
+          <div class="bonus">触发加成：<span class="val" id="result-bonus">无</span></div>
         </div>
       </div>
       <div class="result-actions">
-        <button class="btn-mini" type="button" onclick="handleViewNote()">查看讯息纸条 📜</button>
-        <button class="btn-mini secondary" type="button" onclick="handleAddToAtlas()">收入图鉴 📖</button>
+        <button class="btn-mini" id="btn-view-note" type="button" onclick="handleViewNote()">查看讯息纸条 📜</button>
+        <button class="btn-mini secondary" id="btn-add-atlas" type="button" onclick="handleAddToAtlas()">收入图鉴 📖</button>
         <button class="btn-mini small" type="button" onclick="handleAgain()">再来一次</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="atlas-overlay" aria-hidden="true">
+  <div class="overlay-panel">
+    <div class="modal-card" role="dialog" aria-label="便便详情">
+      <div class="modal-hd">
+        <div class="t" id="modal-title">便便详情</div>
+        <button class="modal-close" type="button" onclick="closeAtlasModal()">✕</button>
+      </div>
+      <div class="modal-img"><img class="poop-img" id="modal-img" alt="poop"></div>
+      <div class="modal-body">
+        <div class="modal-row">稀有度：<span class="v" id="modal-rarity">--</span></div>
+        <div class="modal-row">描述：<span class="v" id="modal-desc">--</span></div>
+        <div class="modal-row">触发条件：<span class="v" id="modal-trigger">--</span></div>
+        <div class="modal-row">收集时间：<span class="v" id="modal-time">--</span></div>
       </div>
     </div>
   </div>
@@ -1031,29 +1459,35 @@ body {
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { POOP_DATABASE, findPoop, getRarityConfig, TOTAL_POOP_COUNT } from './src/poopDatabase.js';
+
 try {
-// ===== STORAGE =====
-const DB = {
-  get: (k, d) => { try { return JSON.parse(localStorage.getItem('bd_'+k)) ?? d; } catch { return d; } },
-  set: (k, v) => { try { localStorage.setItem('bd_'+k, JSON.stringify(v)); } catch {} },
+const STORAGE_KEYS = {
+  records: 'shiji_records',
+  collection: 'shiji_collection',
+  streakDays: 'shiji_streak',
+  lastDate: 'shiji_last_date',
+  luckyPoints: 'shiji_points',
+  weather: 'shiji_weather',
 };
 
-// ===== STATE =====
+const DB = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
 const S = {
-  status: 'idle',   // idle | running | done
+  status: 'idle',
   start: null,
   elapsed: 0,
   interval: null,
   teaseKey: null,
   fifteenShown: false,
   pendingDrop: null,
+  atlasFilter: 'all',
 };
 
-const PHRASES = [
-  '嗯嗯～\n顺畅+1！', '好棒！\n肠道满意！', '完美！\n带薪如厕！',
-  '放松一下\n慢慢来～', '今天也\n很顺畅！', '嗯！\n使劲！',
-];
 const ENCOURAGES = [
   '坚持记录，你的肠道会越来越顺畅哦！💪',
   '规律如厕是健康生活的第一步 🌿',
@@ -1062,103 +1496,70 @@ const ENCOURAGES = [
   '你是今天最认真的如厕达人！🏆',
 ];
 
-// ===== TIMER =====
-function fmt(sec) {
+const WEATHER_LIST = [
+  { code: 'sunny', label: '晴天', emoji: '☀️' },
+  { code: 'cloudy', label: '多云', emoji: '⛅️' },
+  { code: 'overcast', label: '阴天', emoji: '☁️' },
+  { code: 'windy', label: '大风', emoji: '🌬️' },
+  { code: 'rainy', label: '雨天', emoji: '🌧️' },
+  { code: 'stormy', label: '雷雨', emoji: '⛈️' },
+];
+
+function pad2(n) { return String(n).padStart(2,'0'); }
+function ymd(d) { return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function hm(d) { return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+function todayYMD() { return ymd(new Date()); }
+function yesterdayYMD() { const d = new Date(); d.setDate(d.getDate() - 1); return ymd(d); }
+
+function fmtMMSS(sec) {
   return String(Math.floor(sec/60)).padStart(2,'0') + ':' + String(sec%60).padStart(2,'0');
 }
 
-const WEATHERS = [
-  { t: '晴天', e: '☀️' },
-  { t: '多云', e: '⛅️' },
-  { t: '阴天', e: '☁️' },
-  { t: '大风', e: '🌬️' },
-  { t: '雨天', e: '🌧️' },
-  { t: '雷雨', e: '⛈️' },
-];
-
-const POINTS_GOAL = 100;
-
-function dateKeyFromDate(d) {
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+function fmtDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}分${String(s).padStart(2,'0')}秒`;
 }
 
-function todayKey() {
-  return dateKeyFromDate(new Date());
+function randomPick(items) { return items[Math.floor(Math.random() * items.length)]; }
+
+function getRecords() { return DB.get(STORAGE_KEYS.records, []); }
+function setRecords(v) { DB.set(STORAGE_KEYS.records, v); }
+function getCollection() { return DB.get(STORAGE_KEYS.collection, []); }
+function setCollection(v) { DB.set(STORAGE_KEYS.collection, v); }
+function getStreakDays() { return Number(DB.get(STORAGE_KEYS.streakDays, 0)) || 0; }
+function setStreakDays(v) { DB.set(STORAGE_KEYS.streakDays, Math.max(0, Math.floor(v))); }
+function getLastDate() { return DB.get(STORAGE_KEYS.lastDate, null); }
+function setLastDate(v) { DB.set(STORAGE_KEYS.lastDate, v); }
+function getLuckyPoints() { return Number(DB.get(STORAGE_KEYS.luckyPoints, 0)) || 0; }
+function setLuckyPoints(v) { DB.set(STORAGE_KEYS.luckyPoints, Math.max(0, Math.floor(v))); }
+
+function getWeatherCode() {
+  const cur = DB.get(STORAGE_KEYS.weather, null);
+  if (typeof cur === 'string' && WEATHER_LIST.some(w => w.code === cur)) return cur;
+  const init = WEATHER_LIST[Math.floor(Math.random() * WEATHER_LIST.length)].code;
+  DB.set(STORAGE_KEYS.weather, init);
+  return init;
 }
 
-function getWeatherIndexForToday() {
-  const today = todayKey();
-  const w = DB.get('weather', {});
-  if (w && w.date === today && Number.isFinite(w.idx)) return w.idx;
-  const idx = Math.floor(Math.random() * WEATHERS.length);
-  DB.set('weather', { date: today, idx });
-  return idx;
+function setWeatherCode(code) {
+  if (!WEATHER_LIST.some(w => w.code === code)) return;
+  DB.set(STORAGE_KEYS.weather, code);
 }
 
-function setWeatherIndexForToday(idx) {
-  const today = todayKey();
-  DB.set('weather', { date: today, idx });
+function getTier(streakDays) {
+  if (streakDays <= 2) return { cap: 100, pityRarity: 'rare', label: '新手池' };
+  if (streakDays <= 6) return { cap: 200, pityRarity: 'epic', label: '进阶池' };
+  return { cap: 300, pityRarity: 'legendary', label: '传说池' };
 }
 
-function renderWeather() {
-  const idx = getWeatherIndexForToday();
-  const w = WEATHERS[idx] ?? WEATHERS[1];
-  document.getElementById('weather-emoji').textContent = w.e;
-  document.getElementById('weather-text').textContent = w.t;
+function isNightBonus(now) {
+  const h = now.getHours();
+  return h >= 23 || h < 2;
 }
 
-function cycleWeather() {
-  const idx = getWeatherIndexForToday();
-  const next = (idx + 1) % WEATHERS.length;
-  setWeatherIndexForToday(next);
-  renderWeather();
-  showToast('今日天气：' + (WEATHERS[next]?.t ?? ''));
-}
-
-function computeStreak(records) {
-  const days = new Set(records.map(r => r.date));
-  let streak = 0;
-  const d = new Date();
-  while (true) {
-    const key = dateKeyFromDate(d);
-    if (!days.has(key)) break;
-    streak += 1;
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
-}
-
-function renderStreak() {
-  const records = DB.get('records', []);
-  document.getElementById('streak-days').textContent = computeStreak(records);
-}
-
-function showStreakTip() {
-  const s = Number(document.getElementById('streak-days').textContent || 0);
-  if (s > 0) showToast('已连续打卡 ' + s + ' 天，继续保持！');
-  else showToast('今天还没打卡，先来一次吧～');
-}
-
-function getPoints() {
-  return Number(DB.get('points', 0)) || 0;
-}
-
-function setPoints(v) {
-  DB.set('points', Math.max(0, Math.floor(v)));
-}
-
-function renderPoints() {
-  const points = getPoints();
-  const now = points % POINTS_GOAL;
-  document.getElementById('points-goal').textContent = POINTS_GOAL;
-  document.getElementById('points-now').textContent = now;
-  document.getElementById('points-fill').style.width = Math.min(100, Math.max(0, (now / POINTS_GOAL) * 100)) + '%';
-}
-
-function renderBanner() {
-  renderWeather();
-  renderStreak();
-  renderPoints();
+function isRainyWeather(code) {
+  return code === 'rainy' || code === 'stormy';
 }
 
 function teaseByElapsed(sec) {
@@ -1189,42 +1590,134 @@ function updateRunningTease(sec) {
   }
 }
 
-function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
-
-function pickDropResult() {
-  const pool = [
-    { emoji: '💩', name: '经典便便', desc: '复古经典，永不过时。' },
-    { emoji: '💩✨', name: '闪亮便便', desc: '自带高光，今天气色不错。' },
-    { emoji: '💩🌈', name: '彩虹便便', desc: '色彩丰富，心情也一起变好。' },
-    { emoji: '💩👑', name: '加冕便便', desc: '王者气场，闪闪发光。' },
-    { emoji: '💩🔥', name: '热乎便便', desc: '刚出炉，注意文明围观。' },
-  ];
-  return pool[Math.floor(Math.random() * pool.length)];
+function pickByRarity(rarity) {
+  const list = POOP_DATABASE.filter(p => p.rarity === rarity);
+  if (list.length === 0) return randomPick(POOP_DATABASE);
+  return randomPick(list);
 }
 
-function computePointsGain(sec) {
-  const base = Math.floor(sec / 30) + 6;
-  return clamp(base, 6, 36);
+function normalizeProb(p) {
+  const keys = Object.keys(p);
+  for (const k of keys) p[k] = Math.max(0, p[k]);
+  const sum = keys.reduce((a,k) => a + p[k], 0);
+  const out = {};
+  if (sum <= 0) return out;
+  for (const k of keys) out[k] = p[k] / sum;
+  return out;
 }
 
-function showEndOverlay({ elapsed }) {
+function rollRarity(prob) {
+  const r = Math.random();
+  let acc = 0;
+  for (const [k, v] of Object.entries(prob)) {
+    acc += v;
+    if (r <= acc) return k;
+  }
+  return Object.keys(prob)[0] ?? 'common';
+}
+
+function pointsGainByDuration(sec) {
+  if (sec < 60) return 0;
+  if (sec < 180) return 10;
+  if (sec < 480) return 15;
+  if (sec < 900) return 5;
+  return 0;
+}
+
+function buildNote(sec, weatherCode) {
+  const a0 = ['闪电战', '顺滑无比'];
+  const a1 = ['标准发挥', '短促有力'];
+  const a2 = ['带薪摸鱼', '从容不迫'];
+  const a3 = ['深度冥想', '便秘的边缘'];
+  const a4 = ['人椅合一', '双腿的噩梦'];
+  const meals = ['昨晚的火锅', '今早的冰美式', '上午的外卖', '那杯来路不明的奶茶'];
+  const missions = ['终于完成了它的历史使命', '光荣卸任', '交代了后事'];
+  let evals = a2;
+  if (sec < 60) evals = a0;
+  else if (sec < 180) evals = a1;
+  else if (sec < 480) evals = a2;
+  else if (sec < 900) evals = a3;
+  else evals = a4;
+  const leg = Math.min(99, Math.round((sec / 60) * 6));
+  const wTag = isRainyWeather(weatherCode) ? randomPick(['滋润型', '黏糊型']) : null;
+  const wLine = wTag ? `今晚的雨让你获得了${wTag}加成。` : '';
+  return `这是一次${randomPick(evals)}的如厕。你的双腿感受到了${leg}%的麻木。${randomPick(meals)}${randomPick(missions)}。${wLine}`;
+}
+
+function calcDrop(sec) {
+  const now = new Date();
+  const weather = getWeatherCode();
+  const streakDays = getStreakDays();
+  const tier = getTier(streakDays);
+  const luckyPoints = getLuckyPoints();
+  const bonuses = [];
+
+  if (sec < 60) {
+    bonuses.push('⚡ 1分钟内强制神秘');
+    const poop = findPoop('tiny_mystery') ?? pickByRarity('mystery');
+    return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+  if (sec > 900) {
+    bonuses.push('⚡ 15分钟以上强制神秘');
+    const poop = findPoop('numb_legs') ?? pickByRarity('mystery');
+    return { poop, pointsGain: 0, luckyAfter: luckyPoints, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+
+  if (luckyPoints >= tier.cap) {
+    bonuses.push(`🎯 积分池保底（${tier.label}）`);
+    setLuckyPoints(0);
+    const poop = pickByRarity(tier.pityRarity);
+    return { poop, pointsGain: 0, luckyAfter: 0, streakDays, settleAt: now, bonuses, durationSec: sec };
+  }
+
+  const pointsGain = pointsGainByDuration(sec);
+  const luckyAfter = luckyPoints + pointsGain;
+  setLuckyPoints(luckyAfter);
+
+  const base = { common: 70, rare: 20, epic: 8, legendary: 2 };
+  if (isNightBonus(now)) {
+    base.epic += 1.5;
+    base.legendary += 0.5;
+    base.common -= 2.0;
+    bonuses.push('🌙 深夜加成 +1.5% / +0.5%');
+  }
+  if (isRainyWeather(weather)) {
+    base.rare += 1.0;
+    base.common -= 1.0;
+    bonuses.push('🌧 雨天加成 +1%');
+  }
+  const legBonus = Math.min(30, streakDays * 5);
+  if (legBonus > 0) {
+    base.legendary += legBonus;
+    base.common -= legBonus;
+    bonuses.push(`🔥 连击加成：传说+${legBonus}%`);
+  }
+
+  const prob = normalizeProb(base);
+  const rarity = rollRarity(prob);
+  const poop = pickByRarity(rarity);
+  return { poop, pointsGain, luckyAfter, streakDays, settleAt: now, bonuses, durationSec: sec };
+}
+
+function applyRarityToResultCard(rarity) {
+  const el = document.getElementById('result-card');
+  el.classList.remove('rarity-common','rarity-rare','rarity-epic','rarity-legendary','rarity-mystery');
+  el.classList.add('rarity-' + rarity);
+}
+
+function showEndOverlay() {
   const overlay = document.getElementById('drop-overlay');
   const box = document.getElementById('mystery-box');
-  const poop = document.getElementById('drop-poop');
+  const poopEl = document.getElementById('drop-poop');
   const stage = document.getElementById('drop-stage');
   const card = document.getElementById('result-card');
-
-  const pointsGain = computePointsGain(elapsed);
-  const result = pickDropResult();
-  S.pendingDrop = { ...result, pointsGain, elapsed };
 
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
   card.classList.remove('show');
 
   box.className = 'mystery-box';
-  poop.className = 'drop-poop';
-  poop.textContent = result.emoji;
+  poopEl.className = 'drop-poop';
 
   stage.querySelectorAll('.particle').forEach(p => p.remove());
 
@@ -1255,31 +1748,272 @@ function showEndOverlay({ elapsed }) {
   }, 1500);
 
   setTimeout(() => {
-    poop.classList.add('play');
+    poopEl.classList.add('play');
   }, 2000);
 
   setTimeout(() => {
-    finalizeSessionAndShowCard(elapsed);
+    finalizeAndShowCard();
   }, 3000);
-}
-
-function finalizeSessionAndShowCard(elapsed) {
-  const item = S.pendingDrop;
-  if (!item) return;
-  saveRecord(elapsed, item.pointsGain);
-  document.getElementById('result-duration').textContent = fmt(elapsed);
-  document.getElementById('result-points').textContent = String(item.pointsGain);
-  document.getElementById('result-emoji').textContent = item.emoji;
-  document.getElementById('result-name').textContent = item.name;
-  document.getElementById('result-desc').textContent = item.desc;
-
-  document.getElementById('result-card').classList.add('show');
 }
 
 function hideEndOverlay() {
   const overlay = document.getElementById('drop-overlay');
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
+}
+
+function closeAtlasModal() {
+  const overlay = document.getElementById('atlas-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function ensureStreakOnLoad() {
+  const last = getLastDate();
+  if (!last) return;
+  const today = todayYMD();
+  if (last === today) return;
+  if (last === yesterdayYMD()) return;
+  setStreakDays(0);
+}
+
+function updateStreakOnRecord() {
+  const last = getLastDate();
+  const today = todayYMD();
+  const yd = yesterdayYMD();
+  let streak = getStreakDays();
+  if (last === today) return streak;
+  if (last === yd) streak += 1;
+  else streak = 1;
+  setStreakDays(streak);
+  setLastDate(today);
+  return streak;
+}
+
+function refreshStats() {
+  const today = todayYMD();
+  const records = getRecords();
+  const todayRecs = records.filter(r => r.date === today);
+  const count = todayRecs.length;
+  document.getElementById('today-count').textContent = count;
+
+  const yd = yesterdayYMD();
+  const yCount = records.filter(r => r.date === yd).length;
+  const diff = count - yCount;
+  const cSub = document.getElementById('count-compare');
+  if (yCount > 0) {
+    cSub.textContent = (diff >= 0 ? '比昨天 +' : '比昨天 ') + diff;
+    cSub.className = 'card-sub ' + (diff >= 0 ? 'up' : 'down');
+  } else {
+    cSub.textContent = count > 0 ? `今日第${count}次` : '今天还没开始';
+    cSub.className = 'card-sub';
+  }
+
+  if (todayRecs.length > 0) {
+    const avg = Math.round(todayRecs.reduce((a,r) => a + r.durationSec, 0) / todayRecs.length);
+    document.getElementById('avg-display').textContent = fmtMMSS(avg);
+    if (yCount > 0) {
+      const yAvg = Math.round(records.filter(r => r.date === yd).reduce((a,r) => a + r.durationSec, 0) / yCount);
+      const adiff = avg - yAvg;
+      const aEl = document.getElementById('avg-compare');
+      aEl.textContent = '比昨天 ' + (adiff >= 0 ? '+' : '') + fmtMMSS(Math.abs(adiff));
+      aEl.className = 'card-sub ' + (adiff <= 0 ? 'up' : 'down');
+    } else {
+      document.getElementById('avg-compare').textContent = '今日平均';
+    }
+  } else {
+    document.getElementById('avg-display').textContent = '--:--';
+    document.getElementById('avg-compare').textContent = '暂无记录';
+  }
+
+  document.getElementById('box-count').textContent = String(getCollection().length);
+  document.getElementById('encourage-text').textContent = ENCOURAGES[count % ENCOURAGES.length];
+  renderBanner();
+}
+
+function renderBanner() {
+  const weather = getWeatherCode();
+  const w = WEATHER_LIST.find(x => x.code === weather) ?? WEATHER_LIST[0];
+  document.getElementById('weather-emoji').textContent = w.emoji;
+  document.getElementById('weather-text').textContent = w.label;
+
+  document.getElementById('streak-days').textContent = String(getStreakDays());
+
+  const tier = getTier(getStreakDays());
+  const points = getLuckyPoints();
+  document.getElementById('points-goal').textContent = String(tier.cap);
+  document.getElementById('points-now').textContent = String(points);
+  document.getElementById('points-fill').style.width = Math.min(100, Math.max(0, (points / tier.cap) * 100)) + '%';
+}
+
+function showStreakTip() {
+  const s = getStreakDays();
+  const tier = getTier(s);
+  const label = getRarityConfig({ rarity: tier.pityRarity }).label;
+  showToast(`连续打卡 ${s} 天 · ${tier.label}（保底 ${label}）`);
+}
+
+function cycleWeather() {
+  const cur = getWeatherCode();
+  const idx = WEATHER_LIST.findIndex(w => w.code === cur);
+  const next = WEATHER_LIST[(idx + 1 + WEATHER_LIST.length) % WEATHER_LIST.length];
+  setWeatherCode(next.code);
+  renderBanner();
+  showToast('今日天气：' + next.label);
+}
+
+function findFirstCollectTS(poopId) {
+  const records = getRecords();
+  const found = records.filter(r => r.poopId === poopId).sort((a,b) => a.ts - b.ts)[0];
+  return found ? found.ts : null;
+}
+
+function openAtlasModal(poopId) {
+  const poop = findPoop(poopId);
+  if (!poop) return;
+  document.getElementById('modal-title').textContent = poop.name;
+  document.getElementById('modal-img').src = poop.image;
+  document.getElementById('modal-img').alt = poop.name;
+  document.getElementById('modal-rarity').textContent = getRarityConfig(poop).label;
+  document.getElementById('modal-desc').textContent = poop.desc ?? '—';
+  document.getElementById('modal-trigger').textContent = poop.trigger ?? '—';
+  const ts = findFirstCollectTS(poopId);
+  document.getElementById('modal-time').textContent = ts ? (ymd(new Date(ts)) + ' ' + hm(new Date(ts))) : '—';
+  const overlay = document.getElementById('atlas-overlay');
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function renderAtlas() {
+  document.getElementById('atlas-total').textContent = String(TOTAL_POOP_COUNT);
+  const collection = new Set(getCollection());
+  document.getElementById('atlas-count').textContent = String(collection.size);
+  const grid = document.getElementById('atlas-grid');
+  grid.innerHTML = '';
+  const list = S.atlasFilter === 'all' ? POOP_DATABASE : POOP_DATABASE.filter(p => p.rarity === S.atlasFilter);
+  for (const poop of list) {
+    const unlocked = collection.has(poop.id);
+    const item = document.createElement('div');
+    item.className = 'grid-item' + (unlocked ? '' : ' locked');
+    const emoji = document.createElement('div');
+    emoji.className = 'grid-emoji';
+    if (unlocked) {
+      const img = document.createElement('img');
+      img.className = 'poop-img';
+      img.alt = poop.name;
+      img.src = poop.image;
+      emoji.appendChild(img);
+    }
+    const name = document.createElement('div');
+    name.className = 'grid-name';
+    name.textContent = unlocked ? poop.name : '???';
+    const tag = document.createElement('div');
+    tag.className = 'grid-tag';
+    tag.textContent = unlocked ? ('✨ ' + getRarityConfig(poop).label) : '未解锁';
+    item.appendChild(emoji);
+    item.appendChild(name);
+    item.appendChild(tag);
+    if (unlocked) item.addEventListener('click', () => openAtlasModal(poop.id));
+    grid.appendChild(item);
+  }
+}
+
+function setAtlasFilter(filter) {
+  S.atlasFilter = filter;
+  const row = document.getElementById('atlas-filters');
+  Array.from(row.querySelectorAll('.filter-chip')).forEach(btn => btn.classList.remove('active'));
+  const mapping = ['all','common','rare','epic','legendary','mystery'];
+  const idx = mapping.indexOf(filter);
+  const btn = row.querySelectorAll('.filter-chip')[idx];
+  if (btn) btn.classList.add('active');
+  renderAtlas();
+}
+
+function renderRecords() {
+  const records = getRecords();
+  document.getElementById('records-total').textContent = String(records.length);
+  const list = document.getElementById('records-list');
+  list.innerHTML = '';
+  if (records.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'record-note';
+    empty.textContent = '还没有如厕记录，先从一次开始吧～';
+    list.appendChild(empty);
+    return;
+  }
+  records.forEach((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'record';
+    const t = document.createElement('div');
+    t.className = 'record-title';
+    t.innerHTML = `<div class="idx">📋 如厕档案 #${records.length - i}</div><div class="ts">${r.date} ${r.time}</div>`;
+    const l1 = document.createElement('div');
+    l1.className = 'record-line';
+    l1.innerHTML = `⏱ 历时：<span class="v">${fmtDuration(r.durationSec)}</span>`;
+    const l2 = document.createElement('div');
+    l2.className = 'record-line';
+    l2.innerHTML = `💩 获得：<span class="v">${r.poopName}</span>（${r.rarityLabel}）`;
+    const note = document.createElement('div');
+    note.className = 'record-note';
+    note.textContent = r.note;
+    el.appendChild(t);
+    el.appendChild(l1);
+    el.appendChild(l2);
+    el.appendChild(note);
+    list.appendChild(el);
+  });
+}
+
+function saveDropRecord(drop) {
+  const poop = drop.poop;
+  const rarityLabel = getRarityConfig(poop).label;
+  const date = todayYMD();
+  const time = hm(drop.settleAt);
+  const note = buildNote(drop.durationSec, getWeatherCode());
+  const record = {
+    ts: drop.settleAt.getTime(),
+    date,
+    time,
+    durationSec: drop.durationSec,
+    poopId: poop.id,
+    poopName: poop.name,
+    rarity: poop.rarity,
+    rarityLabel,
+    bonuses: drop.bonuses,
+    pointsGain: drop.pointsGain,
+    luckyAfter: drop.luckyAfter,
+    note,
+  };
+  const records = getRecords();
+  records.unshift(record);
+  setRecords(records.slice(0, 200));
+
+  const collection = getCollection();
+  if (!collection.includes(poop.id)) {
+    collection.unshift(poop.id);
+    setCollection(collection);
+  }
+}
+
+function finalizeAndShowCard() {
+  const item = S.pendingDrop;
+  if (!item) return;
+  updateStreakOnRecord();
+  saveDropRecord(item);
+
+  applyRarityToResultCard(item.poop.rarity);
+  document.getElementById('result-poop-img').src = item.poop.image;
+  document.getElementById('result-poop-img').alt = item.poop.name;
+  document.getElementById('result-name').textContent = item.poop.name;
+  document.getElementById('result-rarity').textContent = '✨ ' + getRarityConfig(item.poop).label;
+  document.getElementById('result-duration').textContent = fmtDuration(item.durationSec);
+  document.getElementById('result-time').textContent = hm(item.settleAt);
+  document.getElementById('result-bonus').textContent = item.bonuses.length > 0 ? item.bonuses.join(' · ') : '无';
+
+  document.getElementById('result-card').classList.add('show');
+  refreshStats();
+  renderAtlas();
+  renderRecords();
 }
 
 function handleStart() {
@@ -1298,7 +2032,7 @@ function handleStart() {
   hideEndOverlay();
   S.interval = setInterval(() => {
     S.elapsed = Math.floor((Date.now() - S.start) / 1000);
-    document.getElementById('timer-display').textContent = fmt(S.elapsed);
+    document.getElementById('timer-display').textContent = fmtMMSS(S.elapsed);
     updateRunningTease(S.elapsed);
   }, 500);
 }
@@ -1308,90 +2042,18 @@ function handleEnd() {
   clearInterval(S.interval);
   S.status = 'done';
   S.elapsed = Math.floor((Date.now() - S.start) / 1000);
-  document.getElementById('timer-display').textContent = fmt(S.elapsed);
+  document.getElementById('timer-display').textContent = fmtMMSS(S.elapsed);
   document.getElementById('btn-end').disabled = true;
   document.getElementById('btn-start').disabled = false;
   document.getElementById('scene').classList.remove('running');
   document.getElementById('speech-bubble').innerHTML = '结束结算中…';
-  showEndOverlay({ elapsed: S.elapsed });
-}
 
-// ===== SAVE =====
-function saveRecord(sec, pointsGain = 0) {
-  const today = todayKey();
-  const records = DB.get('records', []);
-  records.unshift({ date: today, sec, ts: Date.now() });
-  DB.set('records', records.slice(0, 200));
-  setPoints(getPoints() + (Number(pointsGain) || 0));
-  const boxes = DB.get('boxes', 0);
-  DB.set('boxes', boxes + 1);
-  refreshStats();
+  const drop = calcDrop(S.elapsed);
+  S.pendingDrop = drop;
+  document.getElementById('drop-poop-img').src = drop.poop.image;
+  document.getElementById('drop-poop-img').alt = drop.poop.name;
+  showEndOverlay();
 }
-
-function refreshStats() {
-  const today = todayKey();
-  const records = DB.get('records', []);
-  const todayRecs = records.filter(r => r.date === today);
-  const count = todayRecs.length;
-  // Today count
-  document.getElementById('today-count').textContent = count;
-  // Yesterday count
-  const yd = new Date(); yd.setDate(yd.getDate()-1);
-  const yKey = `${yd.getFullYear()}${String(yd.getMonth()+1).padStart(2,'0')}${String(yd.getDate()).padStart(2,'0')}`;
-  const yCount = records.filter(r => r.date === yKey).length;
-  const diff = count - yCount;
-  const cSub = document.getElementById('count-compare');
-  if (yCount > 0) {
-    cSub.textContent = (diff >= 0 ? '比昨天 +' : '比昨天 ') + diff;
-    cSub.className = 'card-sub ' + (diff >= 0 ? 'up' : 'down');
-  } else {
-    cSub.textContent = count > 0 ? `今日第${count}次` : '今天还没开始';
-    cSub.className = 'card-sub';
-  }
-  // Avg
-  if (todayRecs.length > 0) {
-    const avg = Math.round(todayRecs.reduce((a,r) => a+r.sec, 0) / todayRecs.length);
-    document.getElementById('avg-display').textContent = fmt(avg);
-    if (yCount > 0) {
-      const yAvg = Math.round(records.filter(r => r.date === yKey).reduce((a,r) => a+r.sec, 0) / yCount);
-      const adiff = avg - yAvg;
-      const aEl = document.getElementById('avg-compare');
-      aEl.textContent = '比昨天 ' + (adiff >= 0 ? '+' : '') + fmt(Math.abs(adiff));
-      aEl.className = 'card-sub ' + (adiff <= 0 ? 'up' : 'down');
-    } else {
-      document.getElementById('avg-compare').textContent = '今日平均';
-    }
-  } else {
-    document.getElementById('avg-display').textContent = '--:--';
-    document.getElementById('avg-compare').textContent = '暂无记录';
-  }
-  // Box count
-  document.getElementById('box-count').textContent = DB.get('boxes', 0);
-  // Encourage
-  const phrases = ENCOURAGES;
-  document.getElementById('encourage-text').textContent = phrases[count % phrases.length];
-  renderBanner();
-}
-
-// ===== TAB SWITCH =====
-function switchTab(n) {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('tab-'+i).classList.toggle('active', i === n);
-  }
-  if (n !== 0) showToast(['首页','图鉴','记录','我的'][n] + ' 页面建设中 🚧');
-}
-
-// ===== TOAST =====
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2800);
-}
-
-// ===== INIT =====
-refreshStats();
-renderBanner();
 
 function handleAgain() {
   hideEndOverlay();
@@ -1401,23 +2063,69 @@ function handleAgain() {
 }
 
 function handleViewNote() {
-  const tips = [
-    '纸条写着：少刷手机，多喝水。',
-    '纸条写着：深呼吸三次，放轻松。',
-    '纸条写着：别蹲太久，腿真的会麻。',
-    '纸条写着：今天也要吃点蔬菜哦～',
-  ];
-  showToast(tips[Math.floor(Math.random() * tips.length)]);
+  const item = S.pendingDrop;
+  if (!item) { showToast('还没有掉落结果'); return; }
+  showToast(buildNote(item.durationSec, getWeatherCode()));
 }
 
 function handleAddToAtlas() {
   const item = S.pendingDrop;
   if (!item) { showToast('还没有掉落结果'); return; }
-  const atlas = DB.get('atlas', []);
-  atlas.unshift({ ...item, ts: Date.now() });
-  DB.set('atlas', atlas.slice(0, 100));
-  showToast('已收入图鉴：' + item.name);
+  const collection = getCollection();
+  const btn = document.getElementById('btn-add-atlas');
+  const origin = btn ? btn.textContent : '';
+  if (!collection.includes(item.poop.id)) {
+    collection.unshift(item.poop.id);
+    setCollection(collection);
+    showToast('已收入图鉴：' + item.poop.name);
+    if (btn) btn.textContent = '已收入 ✅';
+  } else {
+    showToast('已在图鉴中：' + item.poop.name);
+    if (btn) btn.textContent = '已在图鉴 ✅';
+  }
+  if (btn) {
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; btn.textContent = origin || '收入图鉴 📖'; }, 1400);
+  }
+  renderAtlas();
 }
+
+function switchTab(n) {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('tab-'+i).classList.toggle('active', i === n);
+  }
+  const views = ['view-home', 'view-atlas', 'view-records', 'view-me'];
+  views.forEach((id, idx) => document.getElementById(id).classList.toggle('active', idx === n));
+  if (n === 1) renderAtlas();
+  if (n === 2) renderRecords();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  const ms = msg && msg.length > 26 ? 5200 : 2800;
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+ensureStreakOnLoad();
+document.getElementById('atlas-total').textContent = String(TOTAL_POOP_COUNT);
+renderBanner();
+refreshStats();
+renderAtlas();
+renderRecords();
+
+window.handleStart = handleStart;
+window.handleEnd = handleEnd;
+window.handleAgain = handleAgain;
+window.handleViewNote = handleViewNote;
+window.handleAddToAtlas = handleAddToAtlas;
+window.switchTab = switchTab;
+window.showToast = showToast;
+window.cycleWeather = cycleWeather;
+window.showStreakTip = showStreakTip;
+window.setAtlasFilter = setAtlasFilter;
+window.closeAtlasModal = closeAtlasModal;
 
 } catch(e) {
   document.body.innerHTML = `
