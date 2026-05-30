@@ -10,6 +10,14 @@ export function hm(d) {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
+export function hms(d) {
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+
+export function ymdHms(d) {
+  return ymd(d) + ' ' + hms(d);
+}
+
 export function todayYMD() {
   return ymd(new Date());
 }

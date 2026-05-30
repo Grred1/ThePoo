@@ -61,7 +61,7 @@ export const POOP_SHAPES = {
 
 // ---------- 图片资源（本地 png）----------
 // 说明：
-// 1) png 放在 /assets/poop_assets/ 目录
+// 1) 请将本次生成的 png 放到项目根目录的 ./assets/poop_assets/ 目录中
 // 2) 这里使用 new URL(..., import.meta.url) 生成可被打包器识别的资源地址（Vite/webpack 等）
 const asset = (filename) => new URL(`../assets/poop_assets/${filename}`, import.meta.url).href;
 
@@ -103,6 +103,15 @@ export const POOP_IMAGE_MAP = {
   energetic_liquid: asset('pixel_poop_party_watery_transparent.png'),
   surprised_liquid: asset('pixel_poop_surprised_splash_watery_transparent.png'),
 
+  // 普通：蔬菜水果类
+  broccoli: asset('pixel_poop_broccoli.png'),
+  carrot: asset('pixel_poop_carrot.png'),
+  grape: asset('pixel_poop_grape.png'),
+  pinapple: asset('pixel_poop_pinapple.png'),
+  strawberry: asset('pixel_poop_strawberry.png'),
+  rainbow: asset('pixel_poop_rainbow.png'),
+
+
   // 稀有（已生成的像素图）
   early_rage: asset('pixel_poop_angry_storm_pellets_transparent.png'),
   caffeine_overload: asset('pixel_poop_caffeine_overload_transparent.png'),
@@ -117,6 +126,24 @@ export const POOP_IMAGE_MAP = {
   // 史诗（已生成的像素图）
   shocking: asset('pixel_poop_shocked_big_bang_transparent.png'),
   circuit_gut: asset('pixel_poop_confusing_circuit_aura_transparent.png'),
+  sage_moment: asset('pixel_poop_sage_moment_transparent.png'),
+  disenchanted: asset('pixel_poop_disenchanted_zen_transparent.png'),
+
+  // 新增（24-29）
+  dont_want_work: asset('pixel_poop_low_energy_saver_transparent.png'),
+  huaqiang_melon: asset('pixel_poop_huaqiang_melon_transparent.png'),
+  classy_penguin: asset('pixel_poop_classy_penguin_transparent.png'),
+  cyber_woodfish: asset('pixel_poop_cyber_woodfish_transparent.png'),
+  national_producer: asset('pixel_poop_national_producer_transparent.png'),
+  midnight_ghost: asset('pixel_poop_midnight_ghost_transparent.png'),
+
+
+  // 补充缺少的图片
+  salary_thief:asset('pixel_poop_salary_thief.png'),
+  streak_legend_1: asset('pixel_poop_streak_legend_1_dawn_transparent.png'),
+  streak_legend_2: asset('pixel_poop_streak_legend_2_fire_transparent.png'),
+  streak_legend_3: asset('pixel_poop_streak_legend_3_cosmos_transparent.png')
+
 };
 
 // ============================================================
@@ -129,7 +156,6 @@ export const POOP_IMAGE_MAP = {
 //    emoji       卡片展示 emoji（可叠加）
 //    bgColor     卡片背景色（覆盖 RARITY_CONFIG 默认值）
 //    desc        简介文案
-//    aiPrompt    AI 图像生成 Prompt（供图片资源生成使用）
 //    trigger     触发条件说明（中文，用于讯息纸条）
 //    triggerFn   触发判断函数参数说明（见掉落逻辑注释）
 // ============================================================
@@ -432,6 +458,87 @@ export const POOP_DATABASE = [
     triggerFn: { type: 'base_drop', shape: 'liquid' },
   },
 
+  // ══普通蔬菜水果类═════════════════════════════
+  {
+    id: 'broccoli',
+    name: '西兰花养生糊',
+    rarity: 'common',
+    shape: POOP_SHAPES.MUSHY,
+    emoji: '🥦💩',
+    image: POOP_IMAGE_MAP.broccoli,
+    bgColor: '#e8f5e9',
+    desc: '一顿认真吃蔬菜的代价。它通体黄绿，顶部长出了一朵迷你西兰花，散发着清流健康人的傲娇气息。今天的膳食纤维，交代了。',
+    trigger: '稀有概率随机，或天气切换为"养生模式"时概率提升',
+    triggerFn: { type: 'random', rarity: 'rare' },
+  },
+
+  {
+    id: 'carrot',
+    name: '胡萝卜塔',
+    rarity: 'common',
+    shape: POOP_SHAPES.SAUSAGE,
+    emoji: '🥕💩',
+    image: POOP_IMAGE_MAP.carrot,
+    bgColor: '#fff3e0',
+    desc: '螺旋盘绕，顶部冒出一撮绿叶，像一根倔强的胡萝卜决定以便便的形态重返人间。橙意盎然，维生素A含量感人。',
+    trigger: '稀有概率随机',
+    triggerFn: { type: 'random', rarity: 'rare' },
+  },
+
+  {
+    id: 'grape',
+    name: '紫葡萄串',
+    rarity: 'common',
+    shape: POOP_SHAPES.HARD_BALL,
+    emoji: '🍇💩',
+    image: POOP_IMAGE_MAP.grape,
+    bgColor: '#ede7f6',
+    desc: '由十几颗圆润饱满的紫色球粒组成，顶部还挂着一片精致的绿叶。你上周吃的那串葡萄终于走完了它的旅程，转世成为一件艺术品。',
+    trigger: '史诗概率随机',
+    triggerFn: { type: 'random', rarity: 'epic' },
+  },
+
+  {
+    id: 'pineapple',
+    name: '菠萝王座',
+    rarity: 'common',
+    shape: POOP_SHAPES.SAUSAGE,
+    emoji: '🍍💩',
+    image: POOP_IMAGE_MAP.pinapple,
+    bgColor: '#fffde7',
+    desc: '全身覆盖着菠萝纹路的黄金鳞甲，头顶翠绿王冠傲然挺立。菠萝派之争从未停止，而今天的菠萝，选择了便便这条路。它是如此的金灿、如此的扎实。',
+    trigger: '史诗概率随机',
+    triggerFn: { type: 'random', rarity: 'epic' },
+  },
+
+  {
+    id: 'rainbow',
+    name: '彩虹独角兽',
+    rarity: 'common',
+    shape: POOP_SHAPES.SPECIAL,
+    emoji: '🌈🦄💩',
+    image: POOP_IMAGE_MAP.rainbow,
+    bgColor: '#1a0a2e',
+    textColor: '#ffffff',
+    desc: '传说中只有心怀纯粹之人才能拉出的神圣便便。它以彩虹为笔，以星光为墨，浑身缀满了闪烁的宝石光点。有人说看见它会带来好运，有人说这是肠道的最高荣耀。',
+    trigger: '传说概率随机，或连续打卡期间由幸运积分保底触发',
+    triggerFn: { type: 'random', rarity: 'legendary' },
+    specialEffect: 'particle_rainbow',
+  },
+
+  {
+    id: 'strawberry',
+    name: '草莓大福软便',
+    rarity: 'common',
+    shape: POOP_SHAPES.SOFT,
+    emoji: '🍓💩',
+    image: POOP_IMAGE_MAP.strawberry,
+    bgColor: '#fce4ec',
+    desc: '圆润饱满，通体玫瑰红，表面点缀着黄色的芝麻种子，顶部还扎着一撮新鲜绿叶。它甜蜜、丰盛，像一颗溢出来的草莓大福。你的胃是个浪漫主义者。',
+    trigger: '稀有概率随机，或雨天时"滋润型"概率提升',
+    triggerFn: { type: 'random', rarity: 'rare' },
+  },
+
   // ════════════════════════════════════════
   //  稀有款（15 种）
   //  触发：达到稀有概率区间 or 特定时间/条件
@@ -551,107 +658,131 @@ export const POOP_DATABASE = [
     triggerFn: { type: 'streak_and_time', streakDays: 3, hourStart: 15, minuteStart: 15, hourEnd: 15, minuteEnd: 30 },
   },
   {
-    id: 'no_wifi',
-    name: '断网幸存者',
+    id: 'dont_want_work',
+    name: '不想上班',
     rarity: 'rare',
     shape: POOP_SHAPES.SPECIAL,
-    emoji: '📡💩',
-    desc: '在失联荒野中幸存下来的勇士，身后拖着一根断开的网线插头。',
-    trigger: '计时期间 Wi-Fi 断开超过 5 分钟（模拟：点击"我断网了"按钮）',
-    triggerFn: { type: 'user_flag', flag: 'no_wifi' },
-  },
-  {
-    id: 'fragile_student',
-    name: '脆皮大学生',
-    rarity: 'rare',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '🩹💩',
-    desc: '年纪轻轻一碰就碎，散发着虚弱的灰色光环，仿佛下一刻就要请病假。',
-    trigger: '计时开始前标记身体不适，且计时 < 5 分钟',
-    triggerFn: { type: 'user_flag_and_duration', flag: 'body_pain', maxMinutes: 5 },
-  },
-  {
-    id: 'singularity',
-    name: '奇点便便',
-    rarity: 'rare',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '⚫💩',
-    bgColor: '#000000',
-    desc: '表面呈极致黑洞黑色，笼罩着幽蓝色的霍金辐射光晕，表面不停流淌着二进制代码雨。',
-    trigger: '稀有概率随机',
+    emoji: '🫠💩',
+    image: POOP_IMAGE_MAP.dont_want_work,
+    bgColor: '#eeeeee',
+    desc: '假期结束返岗前拉出来的便便，浑身散发着“不想上班”的灰败能量，希望被回收回去。',
+    trigger: '假期结束返岗前（暂按稀有概率随机）',
     triggerFn: { type: 'random', rarity: 'rare' },
   },
   {
-    id: 'lucky_emperor',
-    name: '欧皇便便',
-    rarity: 'rare',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '👑💩🌈',
-    bgColor: '#fffde7',
-    desc: '通体纯金色，表面如抛光黄金般闪亮。镶嵌着像素风格的幸运符号：四叶草、元宝、锦鲤、红包和彩虹。',
-    trigger: '稀有概率随机',
-    triggerFn: { type: 'random', rarity: 'rare' },
-  },
-  {
-    id: 'self_love',
-    name: '爱你老己',
+    id: 'national_producer',
+    name: '全民制作人',
     rarity: 'rare',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🩷💩',
+    image: POOP_IMAGE_MAP.national_producer,
     bgColor: '#fce4ec',
-    desc: '拉屎三分钟也是爱自己的证明。它散发着温柔的暖光，提醒你今天也要好好照顾"老己"。',
-    trigger: '稀有概率随机',
+    desc: '对陌生人操心程度堪比亲妈的产物，评论区催更、养生宝典、情感指导全包，操心中带着一身红色民选热情。',
+    trigger: '民选热情（暂按稀有概率随机）',
     triggerFn: { type: 'random', rarity: 'rare' },
   },
+  // {
+  //   id: 'no_wifi',
+  //   name: '断网幸存者',
+  //   rarity: 'rare',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '📡💩',
+  //   desc: '在失联荒野中幸存下来的勇士，身后拖着一根断开的网线插头。',
+  //   trigger: '计时期间 Wi-Fi 断开超过 5 分钟（模拟：点击"我断网了"按钮）',
+  //   triggerFn: { type: 'user_flag', flag: 'no_wifi' },
+  // },
+  // {
+  //   id: 'fragile_student',
+  //   name: '脆皮大学生',
+  //   rarity: 'rare',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '🩹💩',
+  //   desc: '年纪轻轻一碰就碎，散发着虚弱的灰色光环，仿佛下一刻就要请病假。',
+  //   trigger: '计时开始前标记身体不适，且计时 < 5 分钟',
+  //   triggerFn: { type: 'user_flag_and_duration', flag: 'body_pain', maxMinutes: 5 },
+  // },
+  // {
+  //   id: 'singularity',
+  //   name: '奇点便便',
+  //   rarity: 'rare',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '⚫💩',
+  //   bgColor: '#000000',
+  //   desc: '表面呈极致黑洞黑色，笼罩着幽蓝色的霍金辐射光晕，表面不停流淌着二进制代码雨。',
+  //   trigger: '稀有概率随机',
+  //   triggerFn: { type: 'random', rarity: 'rare' },
+  // },
+  // {
+  //   id: 'lucky_emperor',
+  //   name: '欧皇便便',
+  //   rarity: 'rare',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '👑💩🌈',
+  //   bgColor: '#fffde7',
+  //   desc: '通体纯金色，表面如抛光黄金般闪亮。镶嵌着像素风格的幸运符号：四叶草、元宝、锦鲤、红包和彩虹。',
+  //   trigger: '稀有概率随机',
+  //   triggerFn: { type: 'random', rarity: 'rare' },
+  // },
+  // {
+  //   id: 'self_love',
+  //   name: '爱你老己',
+  //   rarity: 'rare',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '🩷💩',
+  //   bgColor: '#fce4ec',
+  //   desc: '拉屎三分钟也是爱自己的证明。它散发着温柔的暖光，提醒你今天也要好好照顾"老己"。',
+  //   trigger: '稀有概率随机',
+  //   triggerFn: { type: 'random', rarity: 'rare' },
+  // },
 
-  // ════════════════════════════════════════
-  //  史诗款（8 种）—— 部分待策划补充，先填入已有
-  // ════════════════════════════════════════
+  // // ════════════════════════════════════════
+  // //  史诗款（8 种）—— 部分待策划补充，先填入已有
+  // // ════════════════════════════════════════
 
-  {
-    id: 'dark_aura',
-    name: '黑气绕体',
-    rarity: 'epic',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '🖤💩',
-    bgColor: '#1a1a1a',
-    desc: '周身蒸腾着神秘黑气，不知是什么吃进肚子里了。背景有华丽的动态粒子缭绕。',
-    trigger: '史诗概率随机',
-    triggerFn: { type: 'random', rarity: 'epic' },
-  },
-  {
-    id: 'holy_poop',
-    name: '圣光加持',
-    rarity: 'epic',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '✨💩😇',
-    bgColor: '#fffff0',
-    desc: '背后有圣洁光环，这是上天的恩赐，也是肠胃的胜利。',
-    trigger: '史诗概率随机',
-    triggerFn: { type: 'random', rarity: 'epic' },
-  },
-  {
-    id: 'cattle_horse',
-    name: '牛马本马',
-    rarity: 'epic',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '🐴💩',
-    bgColor: '#37474f',
-    desc: '打工人拉给打工人的便便，散发着工牌的金属冷光，写着今日KPI已完成（假的）。',
-    trigger: '史诗概率随机',
-    triggerFn: { type: 'random', rarity: 'epic' },
-  },
-  {
-    id: 'card_check',
-    name: '我要验牌',
-    rarity: 'epic',
-    shape: POOP_SHAPES.SPECIAL,
-    emoji: '🃏💩',
-    bgColor: '#fff8dc',
-    desc: '拉完后强烈怀疑这难道是真的吗？浑身散发着"我要验牌"的质疑金光，仿佛下一秒就要叫你给它擦皮鞋。',
-    trigger: '史诗概率随机',
-    triggerFn: { type: 'random', rarity: 'epic' },
-  },
+  // {
+  //   id: 'dark_aura',
+  //   name: '黑气绕体',
+  //   rarity: 'epic',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '🖤💩',
+  //   bgColor: '#1a1a1a',
+  //   desc: '周身蒸腾着神秘黑气，不知是什么吃进肚子里了。背景有华丽的动态粒子缭绕。',
+  //   trigger: '史诗概率随机',
+  //   triggerFn: { type: 'random', rarity: 'epic' },
+  // },
+  // {
+  //   id: 'holy_poop',
+  //   name: '圣光加持',
+  //   rarity: 'epic',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '✨💩😇',
+  //   bgColor: '#fffff0',
+  //   desc: '背后有圣洁光环，这是上天的恩赐，也是肠胃的胜利。',
+  //   trigger: '史诗概率随机',
+  //   triggerFn: { type: 'random', rarity: 'epic' },
+  // },
+  // {
+  //   id: 'cattle_horse',
+  //   name: '牛马本马',
+  //   rarity: 'epic',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '🐴💩',
+  //   bgColor: '#37474f',
+  //   desc: '打工人拉给打工人的便便，散发着工牌的金属冷光，写着今日KPI已完成（假的）。',
+  //   trigger: '史诗概率随机',
+  //   triggerFn: { type: 'random', rarity: 'epic' },
+  // },
+  // {
+  //   id: 'card_check',
+  //   name: '我要验牌',
+  //   rarity: 'epic',
+  //   shape: POOP_SHAPES.SPECIAL,
+  //   emoji: '🃏💩',
+  //   bgColor: '#fff8dc',
+  //   desc: '拉完后强烈怀疑这难道是真的吗？浑身散发着"我要验牌"的质疑金光，仿佛下一秒就要叫你给它擦皮鞋。',
+  //   trigger: '史诗概率随机',
+  //   triggerFn: { type: 'random', rarity: 'epic' },
+  // },
   {
     id: 'shocking',
     name: '夯爆了',
@@ -677,11 +808,48 @@ export const POOP_DATABASE = [
     triggerFn: { type: 'random', rarity: 'epic' },
   },
   {
+    id: 'huaqiang_melon',
+    name: '华强买瓜',
+    rarity: 'epic',
+    shape: POOP_SHAPES.SPECIAL,
+    emoji: '🍉💩',
+    image: POOP_IMAGE_MAP.huaqiang_melon,
+    bgColor: '#102a13',
+    desc: '重新杀回互联网顶流的产物，开口问“这瓜保熟吗”时自带威慑力，气场比隔壁水果摊的西瓜还大。',
+    trigger: '史诗概率随机',
+    triggerFn: { type: 'random', rarity: 'epic' },
+  },
+  {
+    id: 'classy_penguin',
+    name: '高雅人士',
+    rarity: 'epic',
+    shape: POOP_SHAPES.SPECIAL,
+    emoji: '🐧💩',
+    image: POOP_IMAGE_MAP.classy_penguin,
+    bgColor: '#111111',
+    desc: '外表大腹便便的企鹅同款便便，穿着燕尾服戴着墨镜，表情犀利毒舌，评论区霸屏王。',
+    trigger: '史诗概率随机',
+    triggerFn: { type: 'random', rarity: 'epic' },
+  },
+  {
+    id: 'cyber_woodfish',
+    name: '电子功德木鱼',
+    rarity: 'epic',
+    shape: POOP_SHAPES.SPECIAL,
+    emoji: '🪵💩🟩',
+    image: POOP_IMAGE_MAP.cyber_woodfish,
+    bgColor: '#0b1f12',
+    desc: '边熬夜边在赛博佛祖面前刷KPI的产物，头顶像素木鱼若隐若现，嘴上说着“我不焦虑”。',
+    trigger: '史诗概率随机',
+    triggerFn: { type: 'random', rarity: 'epic' },
+  },
+  {
     id: 'sage_moment',
     name: '贤者时刻',
     rarity: 'epic',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🪷💩',
+    image: POOP_IMAGE_MAP.sage_moment,
     bgColor: '#ede7f6',
     desc: '拉完后突然顿悟人生真谛的产物，浑身散发着开悟的淡紫色智慧光，表情通透得像看穿了一切。',
     trigger: '史诗概率随机',
@@ -693,6 +861,7 @@ export const POOP_DATABASE = [
     rarity: 'epic',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🕊️💩',
+    image: POOP_IMAGE_MAP.disenchanted,
     bgColor: '#fafafa',
     desc: '彻底想开后拉出来的便便，浑身散发着佛系的灰白光，表情平静如水，仿佛在说"不就是个便便么"。',
     trigger: '史诗概率随机',
@@ -709,6 +878,7 @@ export const POOP_DATABASE = [
     rarity: 'legendary',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🌟💩👑',
+    image: POOP_IMAGE_MAP.streak_legend_1,
     bgColor: '#1a1a2e',
     desc: '专属连续打卡纪念款·第一阶。你已经连续打卡7天，成为如厕界冉冉升起的新星。',
     trigger: '连续打卡 7 天，传说池保底触发',
@@ -721,6 +891,7 @@ export const POOP_DATABASE = [
     rarity: 'legendary',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🔥💩👑',
+    image: POOP_IMAGE_MAP.streak_legend_2,
     bgColor: '#0d0d0d',
     desc: '专属连续打卡纪念款·第二阶。你的肠道如同不灭之火，14天的坚守换来这炙热的荣耀。',
     trigger: '连续打卡 14 天，传说池保底触发',
@@ -733,6 +904,7 @@ export const POOP_DATABASE = [
     rarity: 'legendary',
     shape: POOP_SHAPES.SPECIAL,
     emoji: '🌌💩👑',
+    image: POOP_IMAGE_MAP.streak_legend_3,
     bgColor: '#000020',
     desc: '专属连续打卡纪念款·终极。30天，你与宇宙同频。这坨便便已经超越了如厕的范畴。',
     trigger: '连续打卡 30 天，传说池保底触发',

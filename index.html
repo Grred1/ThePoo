@@ -536,10 +536,6 @@ body {
   font-size: 0.78rem; font-weight: 600;
   color: var(--text-mid); line-height: 1.45;
 }
-.encourage-arrow {
-  font-size: 18px; color: var(--text-light);
-  flex-shrink: 0; font-weight: 700;
-}
 
 /* ===== BOTTOM NAV ===== */
 .bottom-nav {
@@ -1365,8 +1361,11 @@ body {
   <!-- ENCOURAGE BAR -->
   <div class="encourage">
     <div class="encourage-ico">👑💩</div>
-    <div class="encourage-txt" id="encourage-text">坚持记录，你的肠道会越来越顺畅哦！💪</div>
-    <div class="encourage-arrow">›</div>
+    <div class="encourage-txt">
+      <div class="encourage-marquee">
+        <div class="encourage-track" id="encourage-track"></div>
+      </div>
+    </div>
   </div>
 
   </div>
@@ -1448,7 +1447,7 @@ body {
       <div class="drop-poop" id="drop-poop" aria-label="drop result"><img class="poop-img" id="drop-poop-img" alt="drop result"></div>
     </div>
     <div class="result-card" id="result-card" role="dialog" aria-label="掉落结果">
-      <div class="result-hd">【获得新便便！】</div>
+      <div class="result-hd" id="result-hd">【获得新便便！】</div>
       <div class="result-body">
         <div class="result-poop-row">
           <div class="result-poop-emoji" id="result-emoji"><img class="poop-img" id="result-poop-img" alt="poop result"></div>
@@ -1604,9 +1603,8 @@ body {
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<<<<<<< Updated upstream
 <script type="module" src="./src/app.js"></script>
-=======
+<template id="merge-conflict">
 <script type="module">
 import { POOP_DATABASE, findPoop, getRarityConfig, TOTAL_POOP_COUNT } from './src/poopDatabase.js';
 
@@ -2286,6 +2284,6 @@ window.closeAtlasModal = closeAtlasModal;
     </div>`;
 }
 </script>
->>>>>>> Stashed changes
+</template>
 </body>
 </html>

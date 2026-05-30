@@ -81,8 +81,27 @@ try {
     const boxCount = document.getElementById('box-count');
     if (boxCount) boxCount.textContent = String(new Set(atlas.getCollection()).size);
 
-    const encourage = document.getElementById('encourage-text');
-    if (encourage) encourage.textContent = config.ENCOURAGES[count % config.ENCOURAGES.length];
+    const encourageTrack = document.getElementById('encourage-track');
+    if (encourageTrack) {
+      const list = config.ENCOURAGES.slice();
+      encourageTrack.innerHTML = list.map((t) => `<div class="encourage-item">${t}</div>`).join('');
+      if (!encourageTrack._carouselInitialized) {
+        encourageTrack._carouselInitialized = true;
+        let idx = 0;
+        const run = () => {
+          idx = (idx + 1) % list.length;
+          encourageTrack.style.transform = `translateY(-${idx * 2.6}em)`;
+        };
+        const schedule = () => {
+          clearTimeout(encourageTrack._carouselTimer);
+          encourageTrack._carouselTimer = setTimeout(() => {
+            run();
+            schedule();
+          }, 5000 + Math.floor(Math.random() * 2001));
+        };
+        schedule();
+      }
+    }
 
     banner.renderBanner();
     atlas.renderAtlas();

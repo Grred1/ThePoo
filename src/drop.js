@@ -198,12 +198,12 @@ export function createDrop({
     records.saveDropRecord(item, { todayYMD: utils.todayYMD, hm: utils.hm });
 
     const collection = atlas.getCollection();
-    if (!collection.includes(item.poop.id)) {
-      collection.unshift(item.poop.id);
-      atlas.setCollection(collection);
-    }
+    const alreadyInAtlas = collection.includes(item.poop.id);
+    item.alreadyInAtlas = alreadyInAtlas;
 
     applyRarityToResultCard(item.poop.rarity);
+    const resultHd = document.getElementById('result-hd');
+    if (resultHd) resultHd.textContent = alreadyInAtlas ? '【获得便便】' : '【获得新便便！】';
     const resultPoopImg = document.getElementById('result-poop-img');
     if (resultPoopImg) {
       resultPoopImg.src = item.poop.image;
@@ -216,9 +216,15 @@ export function createDrop({
     const duration = document.getElementById('result-duration');
     if (duration) duration.textContent = utils.fmtDuration(item.durationSec);
     const time = document.getElementById('result-time');
-    if (time) time.textContent = utils.hm(item.settleAt);
+    if (time) time.textContent = utils.ymdHms(item.settleAt);
     const bonus = document.getElementById('result-bonus');
     if (bonus) bonus.textContent = item.bonuses.length > 0 ? item.bonuses.join(' · ') : '无';
+
+    const btn = document.getElementById('btn-add-atlas');
+    if (btn) {
+      btn.textContent = alreadyInAtlas ? '已在图鉴 ✅' : '加入图鉴 📖';
+      btn.disabled = false;
+    }
 
     const card = document.getElementById('result-card');
     if (card) card.classList.add('show');
@@ -355,7 +361,7 @@ export function createDrop({
       showToast('还没有掉落结果');
       return;
     }
-    showToast(records.buildNote(item.durationSec, banner.getWeatherCode()));
+    showToast(records.buildNote(item, banner.getWeatherCode()));
   };
 
   const handleAddToAtlas = () => {
@@ -366,12 +372,11 @@ export function createDrop({
     }
     const collection = atlas.getCollection();
     const btn = document.getElementById('btn-add-atlas');
-    const origin = btn ? btn.textContent : '';
     if (!collection.includes(item.poop.id)) {
       collection.unshift(item.poop.id);
       atlas.setCollection(collection);
-      showToast('已收入图鉴：' + item.poop.name);
-      if (btn) btn.textContent = '已收入 ✅';
+      showToast('解锁成功，已成功加入图鉴。');
+      if (btn) btn.textContent = '已在图鉴 ✅';
     } else {
       showToast('已在图鉴中：' + item.poop.name);
       if (btn) btn.textContent = '已在图鉴 ✅';
@@ -380,7 +385,7 @@ export function createDrop({
       btn.disabled = true;
       setTimeout(() => {
         btn.disabled = false;
-        btn.textContent = origin || '收入图鉴 📖';
+        btn.textContent = '已在图鉴 ✅';
       }, 1400);
     }
   };
