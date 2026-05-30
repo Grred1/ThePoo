@@ -1,4 +1,5 @@
 import { STORAGE_KEYS } from './storage.js';
+import { WEATHER_LIST } from './config.js';
 
 export function createRecords({ storage, utils, config, getRarityConfig, getWeatherCode }) {
   const getRecords = () => storage.get(STORAGE_KEYS.records, []);
@@ -407,6 +408,9 @@ export function createRecords({ storage, utils, config, getRarityConfig, getWeat
     const date = todayYMD();
     const time = hm(drop.settleAt);
     const note = buildNote(drop, getWeatherCode());
+    const weatherCode = getWeatherCode();
+    const weatherItem = WEATHER_LIST.find((w) => w.code === weatherCode);
+    const weatherLabel = weatherItem ? weatherItem.label : '未知';
     const record = {
       ts: drop.settleAt.getTime(),
       date,
