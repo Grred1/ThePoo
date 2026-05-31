@@ -78,8 +78,42 @@ try {
       }
     }
 
-    const boxCount = document.getElementById('box-count');
-    if (boxCount) boxCount.textContent = String(new Set(atlas.getCollection()).size);
+    const lastName = document.getElementById('last-poop-name');
+    const lastRarity = document.getElementById('last-poop-rarity');
+    const lastImg = document.getElementById('last-poop-img');
+    const lastFallback = document.getElementById('last-poop-fallback');
+    const setLastPoop = (poopData, fallbackName) => {
+      if (poopData) {
+        if (poopData.image && lastImg) {
+          lastImg.src = poopData.image;
+          lastImg.style.display = 'block';
+          if (lastFallback) lastFallback.style.display = 'none';
+        } else {
+          if (lastImg) lastImg.style.display = 'none';
+          if (lastFallback) { lastFallback.textContent = poopData.emoji || '💩'; lastFallback.style.display = 'flex'; }
+        }
+        if (lastName) lastName.textContent = poopData.name;
+        if (lastRarity) {
+          const rc = getRarityConfig(poopData);
+          lastRarity.textContent = rc.label;
+          lastRarity.style.color = rc.color;
+        }
+      } else {
+        if (lastImg) lastImg.style.display = 'none';
+        if (lastFallback) { lastFallback.textContent = '💩'; lastFallback.style.display = 'flex'; }
+        if (lastName) lastName.textContent = fallbackName || '还没有记录';
+        if (lastRarity) { lastRarity.textContent = '普通'; lastRarity.style.color = ''; }
+      }
+    };
+    if (all.length > 0) {
+      const last = all[0];
+      const poopData = findPoop(last.poopId);
+      setLastPoop(poopData || null, last.poopName);
+    } else {
+      const commonPoops = POOP_DATABASE.filter(p => p.rarity === 'common');
+      const pick = commonPoops[Math.floor(Math.random() * commonPoops.length)];
+      setLastPoop(pick || null, '还没拉过～');
+    }
 
     const encourageTrack = document.getElementById('encourage-track');
     if (encourageTrack) {
