@@ -1,7 +1,7 @@
-# 🚽 PoopMart · 便便日记
+# 🚽 PooDiary · 便便日记
 
 > **每一次排空，都是身体的温柔对话。**
-> PoopMart 是一款以肠道健康为切入口的趣味打卡 Web App，通过游戏化收集与数据记录，帮你建立规律如厕的好习惯。
+> PooDiary 是一款以肠道健康为切入口的趣味打卡 Web App，通过游戏化收集与数据记录，帮你建立规律如厕的好习惯。
 
 <p align="center">
   <img src="./assets/screenshot-home.png" alt="首页" width="258">
@@ -154,7 +154,7 @@ poopmart/
 
 ## 💡 设计理念
 
-肠道健康是整体健康的晴雨表。**PoopMart** 希望用轻松、幽默的方式，帮你：
+肠道健康是整体健康的晴雨表。**PooDiary** 希望用轻松、幽默的方式，帮你：
 
 - 🧘 **建立身体觉知** — 关注排便规律，及早发现异常
 - 🎮 **降低坚持门槛** — 游戏化机制让打卡变得有趣
@@ -167,4 +167,11 @@ poopmart/
 
 ## 📝 License
 
-MIT
+Copyright © 2025–2026 Grred.
+
+This project is available for personal, educational, and non-commercial use only.
+Commercial use, resale, redistribution, or incorporation into a commercial product
+requires prior written permission from the author.
+
+The PooDiary name, logo, visual identity, and original artwork are reserved and may
+not be reused without permission.
